@@ -1,0 +1,273 @@
+iceland denmark_strait greenland_sea iceland_basin
+scotland leeds celtic_sea iceland_basin north_sea rockall_basin
+northern_ireland middle_ireland celtic_sea rockall_basin
+middle_ireland northern_ireland southern_ireland celtic_sea rockall_basin
+southern_ireland middle_ireland celtic_sea rockall_basin
+leeds scotland nottingham wales celtic_sea north_sea
+wales london nottingham leeds celtic_sea
+nottingham leeds wales london north_sea
+london nottingham wales celtic_sea english_channel north_sea
+rennes caen nantes english_channel west_european_basin
+nantes rennes caen bourges la_rochelle west_european_basin
+la_rochelle nantes bourges limoges bordeaux west_european_basin
+bordeaux la_rochelle limoges toulouse zaragoza west_european_basin
+zaragoza bordeaux toulouse barcelona valencia madrid valladolid bilbo west_european_basin 
+bilbo valladolid zaragoza coruna west_european_basin
+coruna bilbo valladolid porto iberian_basin west_european_basin
+porto coruna valladolid coimbra iberian_basin
+valladolid zaragoza bilbo coruna porto coimbra badajoz madrid
+coimbra lisboa badajoz valladolid porto iberian_basin
+lisboa badajoz coimbra faro iberian_basin tagus_basin
+faro sevilla badajoz lisboa tagus_basin
+badajoz lisboa coimbra valladolid madrid sevilla faro 
+sevilla faro badajoz madrid murcia algerian_basin tagus_basin
+madrid sevilla badajoz valladolid zaragoza valencia murcia  
+murcia sevilla madrid valencia algerian_basin
+valencia murcia madrid zaragoza barcelona algerian_basin balearic_sea
+north_africa_1 north_africa_2 algerian_basin tagus_basin
+north_africa_2 north_africa_1 north_africa_3 algerian_basin sardino_balearic_plain
+north_africa_3 north_africa_2 sardino_balearic_plain strait_of_sicilia tyrrhenian_sea
+barcelona valencia zaragoza toulouse montpellier balearic_sea western_basin
+toulouse zaragoza bordeaux limoges clermont_ferrand montpellier barcelona 
+montpellier barcelona toulouse clermont_ferrand lyon nice western_basin
+caen rennes nantes bourges rouen english_channel
+rouen caen bourges paris amiens english_channel
+bourges la_rochelle nantes caen rouen paris dijon clermont_ferrand limoges 
+limoges clermont_ferrand toulouse bordeaux la_rochelle bourges 
+clermont_ferrand montpellier toulouse limoges bourges dijon lyon 
+paris bourges rouen amiens reims dijon 
+amiens rouen paris reims belgium calais english_channel
+calais amiens belgium english_channel
+reims paris amiens belgium nancy besancon dijon 
+dijon clermont_ferrand bourges paris reims besancon lyon 
+lyon clermont_ferrand dijon besancon schweiz torino nice montpellier 
+nice montpellier lyon torino western_basin
+sardegna ligure_sea sardino_balearic_plain tyrrhenian_sea western_basin
+torino nice lyon schweiz milano bologna firenze ligure_sea
+firenze torino bologna ancona roma ligure_sea tyrrhenian_sea
+sicilia cosenza ionian_sea strait_of_sicilia tyrrhenian_sea
+cosenza napoli sicilia ionian_sea tyrrhenian_sea
+napoli cosenza ancona roma ionian_sea tyrrhenian_sea adriatic_sea
+roma firenze ancona napoli tyrrhenian_sea
+ancona napoli roma firenze bologna adriatic_sea
+bologna ancona firenze torino milano venezia adriatic_sea
+milano bologna torino schweiz venezia 
+schweiz milano torino lyon besancon strasbourg stuttgart innsbruck venezia 
+besancon lyon dijon reims nancy strasbourg schweiz 
+nancy besancon reims belgium luxembourg trier strasbourg 
+belgium calais amiens reims nancy luxembourg trier dortmund nederland english_channel
+luxembourg nancy belgium trier 
+strasbourg schweiz besancon nancy trier stuttgart 
+stuttgart schweiz schweiz strasbourg trier frankfurt_am_main munchen innsbruck 
+trier stuttgart strasbourg nancy belgium luxembourg dortmund frankfurt_am_main 
+dortmund trier belgium nederland bremen frankfurt_am_main 
+nederland dortmund belgium bremen english_channel north_sea
+venezia bologna milano schweiz innsbruck slovenija adriatic_sea
+innsbruck venezia schweiz stuttgart munchen graz slovenija 
+munchen innsbruck stuttgart frankfurt_am_main magdeburg berlin praha graz 
+frankfurt_am_main munchen munchen stuttgart trier dortmund bremen magdeburg 
+bremen frankfurt_am_main dortmund nederland magdeburg hamburg berlin north_sea
+magdeburg munchen munchen frankfurt_am_main bremen berlin 
+slovenija venezia innsbruck graz gyor zagreb zadar adriatic_sea
+wien graz praha brno bratislava gyor 
+graz slovenija innsbruck munchen praha wien 
+zadar bosna_i_hercegovina slovenija zagreb zadar crna_gora adriatic_sea
+praha wien graz munchen berlin wroclaw brno 
+berlin praha munchen magdeburg bremen hamburg szczecin wroclaw 
+hamburg szczecin berlin bremen denmark baltic_sea kattegat north_sea
+crna_gora zadar bosna_i_hercegovina uzice nis albania adriatic_sea
+bosna_i_hercegovina crna_gora zadar zagreb beograd uzice 
+zagreb bosna_i_hercegovina zadar slovenija gyor szeged beograd 
+gyor zagreb slovenija wien bratislava budapest szeged 
+albania crna_gora nis macedonia ambrakia ionian_sea adriatic_sea
+uzice crna_gora crna_gora bosna_i_hercegovina beograd nis 
+beograd uzice zagreb szeged timisoara nis bosna_i_hercegovina 
+szeged beograd zagreb gyor budapest kosice lviv cluj_napoca timisoara 
+budapest szeged gyor bratislava kosice 
+bratislava budapest gyor wien brno krakow kosice 
+brno bratislava wien praha wroclaw krakow 
+wroclaw brno praha berlin szczecin poznan kielce krakow 
+szczecin wroclaw berlin hamburg gdynia poznan baltic_sea
+poznan wroclaw szczecin gdynia bydgoszcz kielce 
+ambrakia albania macedonia thessaloniki athens kalamata ionian_sea
+athens ambrakia thessaloniki kalamata aegean_sea mirtoan_sea
+kalamata ambrakia athens hellenic_trench mirtoan_sea sea_of_crete
+crete hellenic_trench herodotus_basin sea_of_crete
+thessaloniki athens ambrakia macedonia sofia haskovo tekirdag aegean_sea
+macedonia thessaloniki ambrakia albania nis sofia 
+nis macedonia albania crna_gora uzice beograd timisoara bucuresti vratsa sofia 
+timisoara nis beograd szeged cluj_napoca sibiu bucuresti 
+kosice szeged budapest bratislava krakow lviv 
+krakow kosice bratislava brno wroclaw kielce kielce lublin lviv 
+sofia thessaloniki macedonia nis vratsa haskovo 
+vratsa sofia nis bucuresti gabrovo haskovo 
+burgas tekirdag haskovo gabrovo varna black_sea_west
+haskovo thessaloniki sofia vratsa burgas tekirdag 
+gabrovo burgas vratsa bucuresti varna constanta 
+tekirdag thessaloniki haskovo burgas bursa izmir aegean_sea black_sea_west sea_of_marmara
+bursa tekirdag bolu isparta akhisar izmir black_sea_west sea_of_marmara
+izmir tekirdag bursa akhisar marmaris aegean_sea sea_of_marmara
+akhisar denizli marmaris izmir bursa isparta 
+marmaris izmir akhisar denizli antalya aegean_sea antalya_basin sea_of_crete
+denizli marmaris akhisar isparta antalya 
+isparta denizli akhisar bursa bolu ankara konya antalya 
+antalya marmaris denizli isparta konya karaman antalya_basin
+karaman antalya konya kozan antalya_basin
+cyprus antalya_basin
+konya karaman antalya isparta ankara nigde kozan 
+ankara konya isparta bolu corum nigde 
+bolu ankara isparta bursa corum karabuk black_sea_east black_sea_west
+nigde konya ankara corum samsun sivas kozan 
+kozan karaman konya nigde sivas antalya_basin
+corum nigde ankara bolu karabuk samsun 
+sivas kozan nigde samsun 
+karabuk corum bolu samsun black_sea_east
+samsun sivas nigde corum karabuk black_sea_east
+varna burgas gabrovo constanta black_sea_west
+bucuresti gabrovo vratsa nis timisoara sibiu constanta 
+constanta varna gabrovo bucuresti sibiu lasi moldova odessa black_sea_north black_sea_west
+sibiu bucuresti timisoara cluj_napoca lasi constanta 
+odessa constanta moldova khmelnitsky cherkassy nikolaev black_sea_north
+cluj_napoca sibiu timisoara szeged lviv ternopol lasi 
+ternopol cluj_napoca lviv lutsk zhitomir khmelnitsky moldova lasi 
+lviv ternopol cluj_napoca szeged kosice krakow lublin lutsk 
+kielce krakow wroclaw poznan bydgoszcz warszawa lublin 
+bydgoszcz kielce poznan gdynia olsztyn warszawa 
+gdynia bydgoszcz poznan szczecin olsztyn baltic_sea
+lublin lviv krakow kielce warszawa bialystok brest lutsk 
+warszawa lublin kielce bydgoszcz olsztyn bialystok 
+bialystok lublin warszawa olsztyn kaliningrad klaipeda vilnius grodno brest 
+olsztyn bialystok warszawa bydgoszcz gdynia kaliningrad baltic_sea
+kaliningrad bialystok olsztyn klaipeda baltic_sea
+moldova odessa constanta lasi ternopol khmelnitsky 
+lasi moldova constanta sibiu cluj_napoca ternopol 
+khmelnitsky odessa moldova ternopol zhitomir kiev cherkassy 
+lutsk ternopol lviv lublin brest gomel zhitomir 
+brest lutsk lublin bialystok grodno minsk gomel 
+grodno brest bialystok vilnius vitebsk minsk 
+vilnius grodno bialystok klaipeda riga daugavpils vitebsk 
+minsk brest grodno vitebsk mogilev gomel 
+klaipeda vilnius bialystok kaliningrad riga baltic_sea
+riga klaipeda vilnius daugavpils baltic_sea gulf_of_riga
+nikolaev odessa cherkassy dnipro kherson black_sea_north
+cherkassy nikolaev odessa khmelnitsky kiev poltava dnipro 
+zhitomir khmelnitsky ternopol lutsk gomel kiev 
+gomel zhitomir brest minsk mogilev bryansk chernigov kiev 
+kiev cherkassy khmelnitsky zhitomir gomel chernigov poltava 
+chernigov kiev gomel bryansk sumy poltava 
+gomel chernigov kiev zhitomir lutsk brest minsk mogilev bryansk 
+mogilev gomel minsk vitebsk smolensk bryansk 
+vitebsk mogilev minsk vilnius daugavpils pskov smolensk grodno
+daugavpils vitebsk vilnius riga eesti pskov gulf_of_riga
+eesti daugavpils pskov piter gulf_of_finland gulf_of_riga
+kherson nikolaev dnipro zaporozhye crimea black_sea_north sea_of_azov
+crimea kherson black_sea_east black_sea_north sea_of_azov
+zaporozhye kherson dnipro donetsk sea_of_azov
+dnipro zaporozhye kherson nikolaev cherkassy poltava kharkiv donetsk 
+poltava dnipro cherkassy kiev chernigov sumy kharkiv 
+krasnodar rostov_on_don black_sea_east sea_of_azov
+donetsk zaporozhye dnipro kharkiv lugansk rostov_on_don sea_of_azov
+rostov_on_don krasnodar donetsk lugansk voronezh volgograd sea_of_azov
+lugansk donetsk kharkiv kursk voronezh rostov_on_don 
+kharkiv lugansk donetsk dnipro poltava sumy kursk 
+sumy kharkiv poltava chernigov bryansk kursk 
+volgograd rostov_on_don voronezh penza 
+voronezh volgograd rostov_on_don lugansk kursk lipetsk tambov penza 
+kursk voronezh lugansk kharkiv sumy bryansk orel lipetsk 
+bryansk kursk sumy chernigov gomel mogilev smolensk kaluga orel 
+smolensk bryansk mogilev vitebsk pskov tver moscow kaluga 
+penza volgograd voronezh tambov ryazan saransk 
+tambov penza voronezh lipetsk ryazan 
+lipetsk tambov voronezh kursk orel tula ryazan 
+orel lipetsk kursk bryansk kaluga tula 
+kaluga orel bryansk smolensk moscow tula 
+tula lipetsk orel kaluga moscow ryazan 
+pskov smolensk vitebsk daugavpils eesti piter novgorod tver 
+tver smolensk pskov novgorod vologda yaroslavl moscow 
+moscow tula kaluga smolensk tver yaroslavl vladimir ryazan 
+ryazan penza tambov lipetsk tula moscow vladimir nizhny_novgorod saransk 
+yaroslavl moscow tver vologda kostroma vladimir 
+saransk penza ryazan nizhny_novgorod cheboksary 
+vladimir ryazan moscow yaroslavl kostroma nizhny_novgorod 
+nizhny_novgorod saransk ryazan vladimir kostroma kirov cheboksary 
+cheboksary saransk nizhny_novgorod kirov 
+kostroma nizhny_novgorod vladimir yaroslavl vologda kirov 
+kirov cheboksary nizhny_novgorod kostroma vologda arkhangelsk komi 
+novgorod tver pskov piter vologda 
+piter novgorod pskov eesti vologda karelia helsinki gulf_of_finland
+vologda kirov kostroma yaroslavl novgorod piter tver karelia arkhangelsk
+komi kirov arkhangelsk nenets 
+nenets komi arkhangelsk barents_sea white_sea
+arkhangelsk nenets komi kirov vologda karelia white_sea
+karelia arkhangelsk vologda piter helsinki kuopio oulu rovaniemi murmansk white_sea
+helsinki piter karelia kuopio tampere gulf_of_finland
+kuopio helsinki tampere oulu karelia 
+tampere helsinki kuopio oulu baltic_sea gulf_of_bothnia
+oulu kuopio tampere karelia rovaniemi gulf_of_bothnia
+murmansk karelia rovaniemi alta barents_sea white_sea
+denmark hamburg malmo baltic_sea kattegat north_sea
+malmo denmark halmstad vaxjo kalmar baltic_sea kattegat
+kalmar malmo vaxjo jonkoping linkoping baltic_sea
+vaxjo kalmar malmo halmstad jonkoping 
+halmstad malmo vaxjo jonkoping goteborg kattegat
+jonkoping vaxjo halmstad goteborg linkoping kalmar 
+linkoping kalmar jonkoping goteborg katrineholm baltic_sea
+goteborg linkoping jonkoping halmstad karlstad katrineholm oslo kattegat
+stockholm katrineholm borlange gavle baltic_sea gulf_of_bothnia
+katrineholm linkoping goteborg karlstad borlange stockholm baltic_sea
+karlstad goteborg katrineholm borlange hamar oslo 
+oslo karlstad goteborg hamar otta bergen kristiansand kattegat
+kristiansand oslo oslo bergen kattegat north_sea
+bergen oslo kristiansand otta alesund north_sea norwegian_sea
+borlange stockholm katrineholm karlstad hamar ostersund gavle 
+hamar karlstad oslo otta trondheim ostersund borlange 
+otta hamar oslo bergen alesund trondheim 
+gavle stockholm borlange ostersund sundsvall gulf_of_bothnia
+ostersund gavle borlange hamar trondheim umea sundsvall trofors
+trofors trondheim umea lulea tromso ostersund barents_sea norwegian_sea
+trondheim hamar otta alesund ostersund trofors norwegian_sea
+umea sundsvall ostersund trofors lulea gulf_of_bothnia
+alesund trondheim otta bergen norwegian_sea
+sundsvall umea ostersund gavle gulf_of_bothnia
+lulea umea trofors tromso rovaniemi gulf_of_bothnia
+rovaniemi murmansk oulu lulea karelia alta tromso gulf_of_bothnia
+tromso lulea trofors rovaniemi alta barents_sea
+alta murmansk rovaniemi tromso barents_sea
+adriatic_sea napoli bologna ancona venezia slovenija zadar crna_gora albania ionian_sea
+aegean_sea athens thessaloniki tekirdag izmir marmaris sea_of_marmara mirtoan_sea sea_of_crete
+algerian_basin north_africa_1 north_africa_2 sevilla murcia valencia tagus_basin balearic_sea sardino_balearic_plain
+antalya_basin marmaris antalya karaman kozan cyprus herodotus_basin sea_of_crete
+balearic_sea barcelona valencia algerian_basin sardino_balearic_plain western_basin
+baltic_sea riga klaipeda kaliningrad olsztyn gdynia szczecin hamburg denmark malmo kalmar linkoping katrineholm stockholm tampere gulf_of_bothnia gulf_of_finland gulf_of_riga kattegat
+barents_sea nenets murmansk alta tromso trofors white_sea norwegian_sea
+black_sea_east samsun karabuk bolu crimea krasnodar black_sea_west sea_of_azov
+black_sea_north crimea kherson nikolaev odessa constanta black_sea_west
+black_sea_west bolu bursa tekirdag burgas varna constanta black_sea_east black_sea_north sea_of_marmara
+celtic_sea london wales leeds scotland northern_ireland middle_ireland southern_ireland english_channel west_european_basin rockall_basin
+denmark_strait iceland greenland_sea iceland_basin
+english_channel nederland belgium calais amiens rouen caen rennes london north_sea celtic_sea west_european_basin
+greenland_sea iceland norwegian_sea iceland_basin denmark_strait
+gulf_of_bothnia stockholm gavle sundsvall umea lulea rovaniemi oulu tampere baltic_sea
+gulf_of_finland helsinki piter eesti baltic_sea
+gulf_of_riga eesti daugavpils riga baltic_sea
+hellenic_trench kalamata crete herodotus_basin sea_of_crete ionian_sea
+herodotus_basin crete antalya_basin sea_of_crete hellenic_trench
+iberian_basin coruna porto coimbra lisboa west_european_basin tagus_basin
+iceland_basin iceland scotland denmark_strait greenland_sea norwegian_sea north_sea rockall_basin
+ionian_sea albania ambrakia sicilia cosenza napoli hellenic_trench strait_of_sicilia adriatic_sea
+kattegat kristiansand oslo goteborg halmstad malmo denmark hamburg baltic_sea north_sea
+ligure_sea torino firenze sardegna tyrrhenian_sea western_basin
+mirtoan_sea athens kalamata sea_of_crete aegean_sea
+north_sea bergen kristiansand denmark hamburg bremen nederland london nottingham leeds scotland kattegat english_channel iceland_basin norwegian_sea
+norwegian_sea trofors trondheim alesund bergen north_sea iceland_basin greenland_sea barents_sea
+rockall_basin scotland northern_ireland middle_ireland southern_ireland iceland_basin celtic_sea west_european_basin
+sardino_balearic_plain north_africa_3 north_africa_2 sardegna tyrrhenian_sea western_basin balearic_sea algerian_basin
+sea_of_azov crimea kherson zaporozhye donetsk rostov_on_don krasnodar black_sea_east
+sea_of_crete marmaris kalamata crete aegean_sea mirtoan_sea antalya_basin herodotus_basin hellenic_trench
+sea_of_marmara bursa izmir tekirdag black_sea_west aegean_sea
+strait_of_sicilia sicilia north_africa_3 ionian_sea tyrrhenian_sea
+tagus_basin lisboa faro sevilla north_africa_1 algerian_basin iberian_basin
+tyrrhenian_sea firenze roma napoli cosenza sicilia north_africa_3 sardegna strait_of_sicilia sardino_balearic_plain ligure_sea western_basin
+west_european_basin rennes nantes la_rochelle bordeaux bilbo coruna rockall_basin celtic_sea english_channel iberian_basin zaragoza
+western_basin barcelona montpellier nice sardegna ligure_sea tyrrhenian_sea sardino_balearic_plain balearic_sea
+white_sea nenets arkhangelsk karelia murmansk barents_sea
