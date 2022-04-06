@@ -34,7 +34,7 @@ local is_first = true
 function M.on_player_joined(client)
     -- Because this function does not work in init function. Why???
     if is_first then
-        timer_module.every(10, send_message)
+        timer_module.every(600, send_message)
         is_first = false
     end
 	local t = {
