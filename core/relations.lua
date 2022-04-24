@@ -259,6 +259,10 @@ function M.break_alliance(land1, land2, no_dispatch)
 end
 
 function M.register_vassal(owner, vassal, no_dispatch)
+    -- clear vassals of vassal
+    for k, v in pairs(vassal_list(vassal))
+        M.independence(v)
+    end
 	game_data.lands[vassal].vassal = owner
 	if not no_dispatch then
 		M.register_peace(owner, vassal, true)
