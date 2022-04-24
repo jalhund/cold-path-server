@@ -260,7 +260,7 @@ end
 
 function M.register_vassal(owner, vassal, no_dispatch)
     -- clear vassals of vassal
-    for k, v in pairs(vassal_list(vassal))
+    for k, v in pairs(vassal_list(vassal)) do
         M.independence(v)
     end
 	game_data.lands[vassal].vassal = owner
