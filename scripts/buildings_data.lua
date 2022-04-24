@@ -100,6 +100,12 @@ local t = {
 					},
 					cost = 10000,
 				},
+				[3] = {
+					output = {
+						["gold"] = 750,
+					},
+					cost = 15000,
+				},
 			}
 		},
 	},
@@ -239,27 +245,27 @@ local t = {
 				[1] = {
 					air_attack_damage = 4000,
 					break_building_chance = 0,
-					cost = 20000,
+					cost = 10000,
 				},
 				[2] = {
 					air_attack_damage = 6000,
 					break_building_chance = 0.05,
-					cost = 40000,
+					cost = 20000,
 				},
 				[3] = {
 					air_attack_damage = 8000,
 					break_building_chance = 0.1,
-					cost = 60000,
+					cost = 30000,
 				},
 				[4] = {
 					air_attack_damage = 10000,
 					break_building_chance = 0.2,
-					cost = 80000,
+					cost = 40000,
 				},
 				[5] = {
 					air_attack_damage = 10000,
 					break_building_chance = 0.3,
-					cost = 100000,
+					cost = 50000,
 				},
 			}
 		},
