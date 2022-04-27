@@ -16,7 +16,6 @@ end
 
 function M.init(_api)
 	api = _api
-	-- Example of using server_text
 	--api.register_command("/set_st", set_st)
 end
 
@@ -25,8 +24,17 @@ function M.on_player_joined(client)
         type = "enable_selected_province_tracking",
         data = {}
     }
-    -- turn on to enable selected province tracking
     --api.send_data(to_json(t), client)
+    
+    local t1 = {
+        type = "server_params",
+        data = {
+            server_params = {
+                disable_event_messages = true
+            }
+        }
+    }
+    --api.send_data(to_json(t1), client)
 end
 
 function M.on_data(data, ip, port, client)
