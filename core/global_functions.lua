@@ -182,6 +182,10 @@ function load_adjacency(debug_mode, custom_path)
 		path = "assets/adjacency_map_lp_16.dat"
 	elseif game_data.map == "pvp" then
 		path = "assets/adjacency_map_pvp.dat"
+	elseif game_data.map == "europeamerica" then
+		path = "assets/adjacency_map_europeamerica.dat"
+	elseif game_data.map == "europe_remastered" then
+		path = "assets/adjacency_map_europe_remastered.dat"
 	else
 	    if not network.is_console()  then
             path = debug_game_mode_file_path.."exported_map/adjacency.dat"
@@ -196,7 +200,7 @@ function load_adjacency(debug_mode, custom_path)
 			path = custom_path
 		end
 	end
-    log("error", path)
+    log("Load adjacency path is: ", path)
 	if network.is_console() or debug_mode then
 		local file = io.open(path, "r")
 		data = file:read("*a")
@@ -230,6 +234,7 @@ function load_adjacency(debug_mode, custom_path)
 			end
 		end
 	end
+    -- pprint("adjacency map is", adjacency_map)
 end
 
 function get_adjacency(province)
@@ -445,7 +450,9 @@ function is_visible(land1, province)
 		end
 
 	else
+        -- print("Look path for province: ", province)
 		for k, v in pairs(adjacency_map[province]) do
+            --print(k,v, game_data.provinces[v])
 			if game_data.provinces[v].water and army_functions.get_army(v, land1) > 0 then
 				return true
 			elseif army_functions.get_army(province, land1) > 0 then
