@@ -21,13 +21,18 @@ local function attribute_message(text,client)
 
 	local client_civ = HOST_IS_PLAYER and game_data.player_land or ""
 	local client_name = HOST_IS_PLAYER and settings.name or ""
+    local custom_id = ""
 	if client then
 		client_civ = api.get_data("clients_data")[client].civilization
 		client_name = api.get_data("clients_data")[client].name
+        local cl_data = api.get_data("clients_data")[client]
+        if cl_data.id then
+            custom_id = "["..cl_data.id.."]"
+        end
 	end
 	local c = game_data.lands[client_civ].color
 	local res = "<color="..lume.round(c[1]/255, .01)..","..lume.round(c[2]/255, .01)..","..lume.round(c[3]/255, .01)..
-	",1>|"..game_data.lands[client_civ].name..",lands|["..client_name.."]</color>: "..text
+	",1>|"..game_data.lands[client_civ].name..",lands|["..client_name.."]</color>"..custom_id..": "..text
 	return res
 end
 

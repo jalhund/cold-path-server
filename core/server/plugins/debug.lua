@@ -34,7 +34,7 @@ function M.on_player_joined(client)
             }
         }
     }
-    --api.send_data(to_json(t1), client)
+    -- api.send_data(to_json(t1), client)
 end
 
 function M.on_data(data, ip, port, client)
@@ -45,7 +45,7 @@ function M.on_data(data, ip, port, client)
                 text = "Selected province: "..data.data.province
             }
         }
-        api.send_data(to_json(t), client)
+        -- api.send_data(to_json(t), client)
 	end
 end
 

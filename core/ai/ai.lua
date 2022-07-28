@@ -179,7 +179,8 @@ local strategy_tree = {
 			end
 		end
 		 if game_data.lands[land].ai.strategy.turns == 0 and game_data.lands[land].ai.strategy.target then
-			if relations.available_war(land, game_data.lands[land].ai.strategy.target) and not relations.is_vassal(land) then
+			if relations.available_war(land, game_data.lands[land].ai.strategy.target) and not relations.is_vassal(land)
+      and not relations.is_vassal(game_data.lands[land].ai.strategy.target) then
 				game_data.lands[land].ai.strategy.strategy_type = "preparation"
 				game_data.lands[land].ai.strategy.wish = ai_utils.get_wanted_provinces(land, game_data.lands[land].ai.strategy.target)
 				game_data.lands[land].ai.strategy.turns = math.floor(

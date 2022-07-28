@@ -289,7 +289,7 @@ local function generate_new_land(land)
 
 	pprint("t:", t)
 
-	validate_scenario.validate(t)
+	validate_scenario.validate(t, true) -- true is is_new_land parameter
 
 	game_data.lands[new_land] = deepcopy(t.lands[new_land])
 	for k, v in pairs(provinces) do

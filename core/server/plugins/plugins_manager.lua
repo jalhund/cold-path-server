@@ -141,7 +141,7 @@ function M.init(plugins_api)
 		send_data = plugins_api._send,
 		set_server_state = plugins_api._set_server_state,
 		start = plugins_api._start,
-		next_turn = plugins_api._next
+		next_turn = plugins_api._next,
 	}
 
     if not plugins_data.HOST_IS_PLAYER then
@@ -248,6 +248,8 @@ function M.parse_command(cmd, client)
 	for k, v in pairs(commands_list) do
 		if k == cmd[1] then
 			if not client or plugins_function.check_command_permission(client, cmd[1]) then
+                local client_data = get_data("clients_data")[client]
+                log("players", "Player "..client_data.name.." use command: "..cmd[1].." "..(cmd[2] or "").." "..(cmd[3] or ""))
 				commands_list[k](client, cmd)
 			else
 				plugins_function.chat_message("You do not have permission to do this", "error", true, client)

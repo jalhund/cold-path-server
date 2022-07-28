@@ -15,14 +15,15 @@ function M.no_enemies(land)
 end
 
 function M.available_for_attack(from, to)
+	local a = false
 	for k, v in pairs(game_data.provinces) do
 		if not v.water and v.o == from then
 			if get_short_path_to_enemy(k, from, to) then
-				return true
+				a = true
 			end
 		end
 	end
-	return false
+	return a
 end
 
 function M.buildings_percent(land)
@@ -467,7 +468,7 @@ function M.parse_trade(offer)
 			if resource == "gold" then
 				player_cost = player_cost + count * 30
 			elseif resource == "uranium" then
-				player_cost = player_cost + count * 300000
+				player_cost = player_cost + count * 50000
 			elseif resource == "weapons" then
 				player_cost = player_cost + count * 4
 			elseif resource == "chemical_weapon" then
@@ -504,7 +505,7 @@ function M.parse_trade(offer)
 			if resource == "gold" then
 				land_cost = land_cost + count * 30
 			elseif resource == "uranium" then
-				land_cost = land_cost + count * 300000
+				land_cost = land_cost + count * 50000
 			elseif resource == "weapons" then
 				land_cost = land_cost + count * 4
 			elseif resource == "chemical_weapon" then

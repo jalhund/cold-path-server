@@ -1,5 +1,6 @@
 -- Anticheat plugin. This plugin checks if players can take some action.
 -- Example: Server received a command from the player to build some building. But the player doesn't have enough money
+-- TODO: almost nothing has been done
 
 local M = {}
 
