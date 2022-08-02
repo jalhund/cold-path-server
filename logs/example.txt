@@ -1,0 +1,23 @@
+debug_log: "Start server:"
+debug_log: true
+custom map
+[standard]: ./core/global_functions.lua:203 "Load adjacency path is: " "maps/euro/adjacency.dat"
+[standard]: ./core/server/server.lua:750 "Start server. Console mode: " true
+Creating TCP server
+Starting TCP server on port 5556
+[standard]: ./core/server/server.lua:769 "Start plugin initialization"
+[plugin]: ./core/server/plugins/plugins_manager.lua:131 "Plugins initialization started"
+core.server.plugins.relations	relations
+core.server.plugins.core	core
+core.server.plugins.verifier	verifier
+core.server.plugins.game_switch	game_switch
+core.server.plugins.afk	afk
+core.server.plugins.plugins_manager	plugins_manager
+core.server.plugins.debug	debug
+core.server.plugins.permissions	permissions
+core.server.plugins.rules	rules
+core.server.plugins.system	system
+core.server.plugins.rp	rp
+core.server.plugins.chat	chat
+core.server.plugins.essentials	essentials
+core.server.plugins.hyperlinks	hyperlinks
