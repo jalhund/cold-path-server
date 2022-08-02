@@ -35,7 +35,7 @@ local function check_ban(uuid, ip, unique_id)
     clear_old_records(banned_ip_file_path)
 
     for key, value in pairs(db.banned) do
-        pprint(value, socket.gettime())
+        -- pprint(value, socket.gettime())
         if value.ban_time < socket.gettime() then
             db.banned[key] = nil
         elseif value.uuid == uuid or value.unique_id == unique_id then
@@ -82,7 +82,6 @@ local function ban(client, args)
         end
 
         local ban_time = socket.gettime() + t * 60 * 60
-        api.call_function("chat_message", args[2] .. " banned by "..admin_name.." for " .. t .. " hours", "system")
 
         local ban_id = 1
         for i = 1, 99999999, 1 do
@@ -91,6 +90,8 @@ local function ban(client, args)
                 break
             end
         end
+
+        api.call_function("chat_message", args[2] .. " banned by "..admin_name.." for " .. t .. " hours. Ban ID: "..ban_id, "system")
 
         local reason = "Admin: "..admin_name..". Ban ID: "..ban_id..". "
         if args[3] then
@@ -132,7 +133,6 @@ local function banid(client, args)
         end
 
         local ban_time = socket.gettime() + t * 60 * 60
-        api.call_function("chat_message", args[2] .. " banned by "..admin_name.." for " .. t .. " hours", "system")
 
         local ban_id = 1
         for i = 1, 99999999, 1 do
@@ -141,6 +141,8 @@ local function banid(client, args)
                 break
             end
         end
+
+        api.call_function("chat_message", args[2] .. " banned by "..admin_name.." for " .. t .. " hours. Ban ID: "..ban_id, "system")
 
         local reason = "Admin: "..admin_name..". Ban ID: "..ban_id..". "
         if args[3] then
@@ -309,7 +311,7 @@ local function history(client, args)
     local name = args[2]
 
     if name and db.name_history[name] then
-        api.call_function("chat_message", "Name "..name.." history: " .. inspect(db.name_history[name]), "system")
+        api.call_function("chat_message", "Name "..name.." history: " .. inspect(db.name_history[name]), "system", true, client)
     else
         api.call_function("chat_message", "Unknown name", "error", true, client)
     end
