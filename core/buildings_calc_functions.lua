@@ -53,7 +53,6 @@ local function calc_building(province_id, province_data, building_data, n, build
 	if building_data.input then
 		for k, v in pairs(building_data.input) do
 			local action, resource = k:match("([%a_]+):([%a_]+)")
-			-- print("action, resource:", k, action, resource)
 			if not action then
 				if k == "gold" then
 					game_data.lands[province_data.o].economy.expense.buildings =
@@ -83,6 +82,8 @@ local function calc_building(province_id, province_data, building_data, n, build
 					-- game_data.lands[province_data.o].resources[resource] = game_data.lands[province_data.o].resources[resource] + res
 				elseif res == 0 then
 					province_data.r[resource] = nil
+                elseif not available_resource(province_data.o, province_data.r[resource]) then
+                    input_done = false
 				end
 			end
 		end
