@@ -165,7 +165,12 @@ function M.build(land, budget)
                         #get_building_data(building).lvl) and get_building_cost(land, building, game_data.provinces[province].b[building]) < b then
             -- print("Selected province:", land, province, building)
             if available_building(land, province, building) then
-                core.build(land, province, building)
+                -- pprint("Debug building", land, province, building)
+                if game_data.provinces[province].b.mine == 4 and game_data.provinces[province].r.gold then
+                    -- print("[AI] Ignore mine lvl 5 for gold")
+                else
+                    core.build(land, province, building)
+                end
             end
             if #game_data.provinces[province].b > province_buildings_limit(province) then
                 local building_for_destroy = lume.weightedchoice(game_data.provinces[province].b)

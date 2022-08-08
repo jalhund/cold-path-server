@@ -465,7 +465,9 @@ function M.parse_trade(offer)
 			local count = v.value:gsub("%D+", "")
 			count = tonumber(count)
 
-			if resource == "gold" then
+            if game_data.lands[from].resources[resource] < count then
+                print("Do nothing, because there is not enough resources")
+            elseif resource == "gold" then
 				player_cost = player_cost + count * 30
 			elseif resource == "uranium" then
 				player_cost = player_cost + count * 50000
@@ -502,7 +504,9 @@ function M.parse_trade(offer)
 			local count = v.value:gsub("%D+", "")
 			count = tonumber(count)
 
-			if resource == "gold" then
+            if game_data.lands[land].resources[resource] < count then
+                print("Do nothing, because there is not enough resources")
+            elseif resource == "gold" then
 				land_cost = land_cost + count * 30
 			elseif resource == "uranium" then
 				land_cost = land_cost + count * 50000
