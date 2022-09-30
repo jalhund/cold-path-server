@@ -14,7 +14,7 @@ end
 
 local api
 
-local verification_mode = "kick" -- ignore, log, kick
+-- local verification_mode = "kick" -- ignore, log, kick
 
 local verification_server_ip
 local verification_server_port
@@ -56,43 +56,46 @@ function M.init(_api)
 end
 
 function M.verify_registration(client, client_data)
-	local license = true
-	pprint("Verify client data:", client_data)
-	if client_data.device == "Android" then
-		-- pprint("Client login data:", client_data.login_data)
-		if client_data.login_data and client_data.login_data.package_name then
-			local url = "https://"..verification_server_ip..":"..verification_server_port.."/verify/"..client_data.uuid.."/v".."/v"
-			local body, code, headers, status = https.request(url)
-			if status and code == 400 then
-				license = false
-			end
-			if status and code == 201 then
-				client_data.premium = true
-				api.call_function("set_permissions_group", client, "premium")
-			end
-			if client_data.login_data.package_name ~= "com.DenisMakhortov.ColdPath" or not client_data.login_data.installed_from_market then
-				-- license = false
-			end
-		else
-			license = false
-		end
-	elseif client_data.device == "Windows" then
-		license = true
-	end
-	if lume.match(pass_data, function(x) return x == client_data.name end) then
-		license = true
-	end
+    client_data.premium = true
+	api.call_function("set_permissions_group", client, "premium")
+    return true
+	-- local license = true
+	-- pprint("Verify client data:", client_data)
+	-- if client_data.device == "Android" then
+	-- 	-- pprint("Client login data:", client_data.login_data)
+	-- 	if client_data.login_data and client_data.login_data.package_name then
+	-- 		local url = "https://"..verification_server_ip..":"..verification_server_port.."/verify/"..client_data.uuid.."/v".."/v"
+	-- 		local body, code, headers, status = https.request(url)
+	-- 		if status and code == 400 then
+	-- 			license = false
+	-- 		end
+	-- 		if status and code == 201 then
+	-- 			client_data.premium = true
+	-- 			api.call_function("set_permissions_group", client, "premium")
+	-- 		end
+	-- 		if client_data.login_data.package_name ~= "com.DenisMakhortov.ColdPath" or not client_data.login_data.installed_from_market then
+	-- 			-- license = false
+	-- 		end
+	-- 	else
+	-- 		license = false
+	-- 	end
+	-- elseif client_data.device == "Windows" then
+	-- 	license = true
+	-- end
+	-- if lume.match(pass_data, function(x) return x == client_data.name end) then
+	-- 	license = true
+	-- end
 
-	if verification_mode == "ignore" then
-		return true
-	elseif verification_mode == "log" then
-		if not license then
-			api.call_function("chat_message", "Player "..client_data.name.." joined from the unofficial version of the game", "system")
-		end
-		return true
-	elseif verification_mode == "kick" then
-		return license
-	end
+	-- if verification_mode == "ignore" then
+	-- 	return true
+	-- elseif verification_mode == "log" then
+	-- 	if not license then
+	-- 		api.call_function("chat_message", "Player "..client_data.name.." joined from the unofficial version of the game", "system")
+	-- 	end
+	-- 	return true
+	-- elseif verification_mode == "kick" then
+	-- 	return license
+	-- end
 end
 
 return M
