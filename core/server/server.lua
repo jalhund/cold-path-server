@@ -95,6 +95,10 @@ local function check_name(name)
 	if name == "" then
 		return false
 	end
+	if name:match("%W") then
+		return false
+	end
+      
 	if HOST_IS_PLAYER and name == settings.name then
 		return false
 	end
