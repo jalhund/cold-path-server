@@ -18,10 +18,11 @@ local t = {
 	Example: game version is 5.3, server version is 5, because
 	client-server compatibility is determined by this number.
 	Do not touch in order to allow players to join. Update the server.--]]
-	SERVER_VERSION = 18,
+	SERVER_VERSION = 19,
 	-- Maximum amount of time per turn. Seconds
 	time_to_turn = 180,
 	verify_uuid = true,
+    minimum_played_time = 5*60, -- time in seconds that player must play in singleplayer mode to join this multiplayer server
 	plugin = {
 		welcome = [[Welcome to Official Server #1!
 We ask you to be friendly towards other players.

@@ -978,7 +978,7 @@ function building_description(buildings_id, lvl)
 end
 
 function validate_text(text)
-	return string.find(text, "<") and string.find(text, ">") or not string.match(text, "%S")
+	return string.find(text, "<") and string.find(text, ">") or string.find(text, "|") or not string.match(text, "%S")
 end
 
 function translate_message(text)

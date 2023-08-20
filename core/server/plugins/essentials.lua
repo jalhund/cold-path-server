@@ -5,6 +5,7 @@ local server_settings = require "server_settings"
 
 local inspect = require "scripts.utils.inspect"
 local flatdb = require 'scripts.utils.flatdb'
+local xor_lib = require "scripts.utils.xor"
 local db
 
 local api
@@ -355,6 +356,20 @@ function M.verify_registration(client, client_data)
     if timestamp then
         return false, "You are banned until: " .. os.date("%c", timestamp) .. "\nReason: " .. reason
     end
+
+    if not client_data.elapsed_time then
+        return false, "Please restart game"
+    end
+
+    local elapsed_time = xor_lib(client_data.elapsed_time, client_data.uuid)
+
+    elapsed_time = tonumber(elapsed_time)
+
+    if elapsed_time < server_settings.minimum_played_time then
+        return false, "Sorry, you can't join this server. You have to play "..math.ceil(server_settings.minimum_played_time / 60)
+            .." minutes in singleplayer mode to join this server"
+    end
+
     return true
 end
 
