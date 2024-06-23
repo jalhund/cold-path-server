@@ -685,7 +685,7 @@ local function on_data(data, ip, port, client)
 	end)
 	if not ok then
 		log("error", "On data error: ", err)
-		kick(client, err)
+		kick(client, "An error occurred while processing your request. Please make sure the quality of the connection is good and the correct version of the game")
 	end
 end
 
