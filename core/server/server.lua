@@ -535,6 +535,7 @@ local function on_data(data, ip, port, client)
 		elseif data.type == "introduce" then
 			register_player(client, data.data, ip)
 		end
+		
 		if clients_data[client] and clients_data[client].state and clients_data[client].state == "in_game" then
 			plugin.on_data(data, ip, port, client)
 			if data.type == "ready" then
@@ -684,7 +685,7 @@ local function on_data(data, ip, port, client)
 	end)
 	if not ok then
 		log("error", "On data error: ", err)
-		kick(client, "An error occurred while processing your request. Please make sure the quality of the connection is good and the correct version of the game")
+		kick(client, err)
 	end
 end
 
