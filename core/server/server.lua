@@ -606,30 +606,30 @@ local function on_data(data, ip, port, client)
 				end
 				core.destroy(data.data.land,data.data.province, data.data.building_id)
 			elseif data.type == "peace" then
-				if not ac.verify_action("peace", data.data.from, data.data.to) then
+				if not ac.verify_action("peace", clients_data[client].civilization, data.data.to) then
 					return false
 				end
-				M.peace(data.data.from, data.data.to)
+				M.peace(clients_data[client].civilization, data.data.to)
 			elseif data.type == "pact" then
-				if not ac.verify_action("pact", data.data.from, data.data.to) then
+				if not ac.verify_action("pact", clients_data[client].civilization, data.data.to) then
 					return false
 				end
-				M.pact(data.data.from, data.data.to)
+				M.pact(clients_data[client].civilization, data.data.to)
 			elseif data.type == "war" then
-				if not ac.verify_action("war", data.data.from, data.data.to) then
+				if not ac.verify_action("war", clients_data[client].civilization, data.data.to) then
 					return false
 				end
-				M.war(data.data.from, data.data.to)
+				M.war(clients_data[client].civilization, data.data.to)
 			elseif data.type == "alliance" then
-				if not ac.verify_action("alliance", data.data.from, data.data.to) then
+				if not ac.verify_action("alliance", clients_data[client].civilization, data.data.to) then
 					return false
 				end
-				M.alliance(data.data.from, data.data.to)
+				M.alliance(clients_data[client].civilization, data.data.to)
 			elseif data.type == "break_alliance" then
-				if not ac.verify_action("break_alliance", data.data.from, data.data.to) then
+				if not ac.verify_action("break_alliance", clients_data[client].civilization, data.data.to) then
 					return false
 				end
-				M.break_alliance(data.data.from, data.data.to)
+				M.break_alliance(clients_data[client].civilization, data.data.to)
 			elseif data.type == "chemical_weapon" then
 				if not ac.verify_action("chemical_weapon", data.data.land, data.data.from, data.data.to) then
 					return false
@@ -646,10 +646,10 @@ local function on_data(data, ip, port, client)
 				end
 				M.nuclear_weapon(data.data.land, data.data.province)
 			elseif data.type == "vassal" then
-				if not ac.verify_action("vassal", data.data.land1, data.data.land2) then
+				if not ac.verify_action("vassal", clients_data[client].civilization, data.data.land2) then
 					return false
 				end
-				M.vassal(data.data.land1, data.data.land2)
+				M.vassal(clients_data[client].civilization, data.data.land2)
 			elseif data.type == "revolt" then
 				if not ac.verify_action("revolt", data.data.owner, data.data.vassal) then
 					return false
@@ -661,10 +661,10 @@ local function on_data(data, ip, port, client)
 				end
 				M.independence(data.data.owner, data.data.vassal)
 			elseif data.type == "trade" then
-				if not ac.verify_action("trade", data.data.from, data.data.to, data.data.from_list, data.data.to_list) then
+				if not ac.verify_action("trade", clients_data[client].civilization, data.data.to, data.data.from_list, data.data.to_list) then
 					return false
 				end
-				M.trade(data.data.from, data.data.to, data.data.from_list, data.data.to_list)
+				M.trade(clients_data[client].civilization, data.data.to, data.data.from_list, data.data.to_list)
 			elseif data.type == "urge_allies" then
 				if not ac.verify_action("urge_allies", data.data.land, data.data.enemy) then
 					return false
