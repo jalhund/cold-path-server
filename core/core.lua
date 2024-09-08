@@ -444,10 +444,10 @@ function M.accept_offer(offer_id)
 						val = game_data.lands[val].vassal
 					end
 					offers.register("war", offer[4], val)
-				elseif it == "gold" and game_data.lands[offer[4]].money >= val then
+				elseif it == "gold" and game_data.lands[offer[4]].money >= val and val >= 0 then
 					game_data.lands[offer[4]].money = game_data.lands[offer[4]].money - val
 					game_data.lands[offer[3]].money = game_data.lands[offer[3]].money + val
-				elseif it == "per_turn" and game_data.lands[offer[4]].economy.balance >= val then
+				elseif it == "per_turn" and game_data.lands[offer[4]].economy.balance >= val and val >= 0 then
 					table.insert(game_data.trade, {
 						"per_turn", offer[4], offer[3], val, game_values.trade_gold_per_turn_duration
 					})
@@ -456,7 +456,7 @@ function M.accept_offer(offer_id)
 					resource = string.gsub(resource, ":", "")
 					local count = val:gsub("%D+", "")
 					count = tonumber(count)
-					if game_data.lands[offer[4]].resources[resource] >= count then
+					if game_data.lands[offer[4]].resources[resource] >= count and count >= 0 then
 						game_data.lands[offer[4]].resources[resource] = game_data.lands[offer[4]].resources[resource] - count
 						game_data.lands[offer[3]].resources[resource] = game_data.lands[offer[3]].resources[resource] + count
 					end
