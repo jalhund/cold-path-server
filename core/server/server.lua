@@ -680,7 +680,9 @@ local function on_data(data, ip, port, client)
 					return false
 				end
 				M.accept_offer(data.data.land, data.data.offer_id)
-			end
+			elseif data.type == "change_country" then
+				M.change_country(data.data.from, data.data.to, client)
+			end 
 		end
 	end)
 	if not ok then
@@ -1170,6 +1172,13 @@ end
 
 function M.accept_offer(land, offer_id)
 	core.accept_offer(offer_id, accept_offer_callback)
+end
+
+function M.change_country(from, to, client)
+	if not free_land(to) then
+		preferred_civs[clients_data[client].uuid] = to
+		kick(client, "Civilization changed!")
+	end
 end
 
 return M
