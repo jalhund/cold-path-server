@@ -1175,7 +1175,7 @@ function M.accept_offer(land, offer_id)
 end
 
 function M.change_country(from, to, client)
-	if not free_land(to) then
+	if free_land(to) then
 		preferred_civs[clients_data[client].uuid] = to
 		kick(client, "Civilization changed!")
 	end
