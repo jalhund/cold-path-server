@@ -680,6 +680,12 @@ local function on_data(data, ip, port, client)
 					return false
 				end
 				M.accept_offer(data.data.land, data.data.offer_id)
+			elseif data.type == "change_country" then
+				M.change_country(data.data.from, data.data.to, client)
+			elseif data.type == "change_country_name" then
+				M.change_country_name(data.data.land, data.data.new_name, client)
+			elseif data.type == "change_country_color" then
+				M.change_country_color(data.data.land, data.data.new_color, client)
 			end
 		end
 	end)
@@ -1170,6 +1176,47 @@ end
 
 function M.accept_offer(land, offer_id)
 	core.accept_offer(offer_id, accept_offer_callback)
+end
+
+function M.change_country(from, to, client)
+	if free_land(to) then
+		preferred_civs[clients_data[client].uuid] = to
+		kick(client, "Civilization changed!")
+	end
+end
+
+function M.change_country_name(land, name, client)
+	local client_land = clients_data[client].civilization
+
+	if land ~= client_land then
+		return
+	end
+
+	game_data.lands[clients_data[client].civilization].name = name
+
+	t = {
+		type = "country_name_changed",
+		data = {}
+	}
+
+	tcp_server.urgent_send(to_json(t), client)
+end
+
+function M.change_country_color(land, color, client)
+	local client_land = clients_data[client].civilization
+
+	if land ~= client_land then
+		return
+	end
+
+	game_data.lands[clients_data[client].civilization].color = color
+
+	t = {
+		type = "country_color_changed",
+		data = {}
+	}
+
+	tcp_server.urgent_send(to_json(t), client)
 end
 
 return M

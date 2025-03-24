@@ -4,6 +4,8 @@ local t = {
 		data = {
 			--Server name
 			name = "[EN] [Standard] Official server #1",
+			-- Icon url
+			icon_url = "",
 			--Will be automatically changed
 			players = 1,
 			--Will be automatically filled
@@ -18,7 +20,7 @@ local t = {
 	Example: game version is 5.3, server version is 5, because
 	client-server compatibility is determined by this number.
 	Do not touch in order to allow players to join. Update the server.--]]
-	SERVER_VERSION = 19,
+	SERVER_VERSION = 20,
 	-- Maximum amount of time per turn. Seconds
 	time_to_turn = 180,
 	verify_uuid = true,
