@@ -301,9 +301,19 @@ function M.chemical_weapon(land, from, to)
 end
 
 function M.nuclear_weapon(land, province)
+	-- Выбираем случайную провинцию атакующей страны для запуска ракеты
+	local attacking_provinces = {}
+	for k, v in pairs(game_data.provinces) do
+		if v.o == land and not v.water then
+			table.insert(attacking_provinces, k)
+		end
+	end
+	
+	local from_province = attacking_provinces[math.random(#attacking_provinces)]
+	
 	game_data.lands[land].resources.uranium = game_data.lands[land].resources.uranium - game_values.nuclear_weapon_cost_uranium
-	table.insert(game_data.used_explosions, {land, province})
-	table.insert(game_data.queue, { land, "nuclear", province})
+	table.insert(game_data.used_explosions, {land, province, from_province})
+	table.insert(game_data.queue, { land, "nuclear", province, from_province})
 	game_data.lands[land].movement_points = game_data.lands[land].movement_points - 1
 	-- pprint("Nuclear queue:", game_data.queue)
 end
