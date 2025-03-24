@@ -281,31 +281,30 @@ function M.chemical(land, from, to)
 	table.insert(game_data.current_chemical, {from,to,  land})
 end
 
-function M.nuclear(land, to)
-	game_data.provinces[to].a = {}
-	game_data.lands[game_data.provinces[to].o].last_attacked = land
-	game_data.provinces[to].o = "Undeveloped_land"
-	game_data.provinces[to].p = 0
-	game_data.provinces[to].b = {}
+function M.nuclear(land, to, from_province)
+    game_data.provinces[to].a = {}
+    game_data.lands[game_data.provinces[to].o].last_attacked = land
+    game_data.provinces[to].o = "Undeveloped_land"
+    game_data.provinces[to].p = 0
+    game_data.provinces[to].b = {}
 
+    for _, v in pairs(get_adjacency(to)) do
+        local province_data = game_data.provinces[v]
+        for key, val in pairs(province_data.a) do
+            M.set_army(v, val - math.floor(val * game_values.nuclear_weapon_damage_radius), key)
+        end
+        if not province_data.water then
+            province_data.p = province_data.p
+             - math.floor(province_data.p * game_values.nuclear_weapon_damage_radius)
+            for i = #province_data.b, 1 do
+                if lume.random() < game_values.nuclear_weapon_destroy_buildings_chance then
+                    table.remove(province_data.b, i)
+                end
+            end
+        end
+    end
 
-	for _, v in pairs(get_adjacency(to)) do
-		local province_data = game_data.provinces[v]
-		for key, val in pairs(province_data.a) do
-			M.set_army(v, val - math.floor(val * game_values.nuclear_weapon_damage_radius), key)
-		end
-		if not province_data.water then
-			province_data.p = province_data.p
-			 - math.floor(province_data.p * game_values.nuclear_weapon_damage_radius)
-			for i = #province_data.b, 1 do
-				if lume.random() < game_values.nuclear_weapon_destroy_buildings_chance then
-					table.remove(province_data.b, i)
-				end
-			end
-		end
-	end
-
-	table.insert(game_data.current_explosions, {"nuclear_weapon", to})
+    table.insert(game_data.current_explosions, {"nuclear_weapon", to, from_province})
 end
 
 function M.army_recruit_cost(land)
