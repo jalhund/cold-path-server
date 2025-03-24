@@ -4,6 +4,8 @@ local t = {
 		data = {
 			--Server name
 			name = "[EN] [Standard] Official server #1",
+			-- Icon url
+			icon_url = "",
 			--Will be automatically changed
 			players = 1,
 			--Will be automatically filled
