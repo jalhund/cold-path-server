@@ -282,29 +282,55 @@ function M.chemical(land, from, to)
 end
 
 function M.nuclear(land, to, from_province)
-    game_data.provinces[to].a = {}
-    game_data.lands[game_data.provinces[to].o].last_attacked = land
-    game_data.provinces[to].o = "Undeveloped_land"
-    game_data.provinces[to].p = 0
-    game_data.provinces[to].b = {}
+	game_data.provinces[to].a = {}
+	game_data.lands[game_data.provinces[to].o].last_attacked = land
+	game_data.provinces[to].o = "Undeveloped_land"
+	game_data.provinces[to].p = 0
+	game_data.provinces[to].b = {}
 
-    for _, v in pairs(get_adjacency(to)) do
-        local province_data = game_data.provinces[v]
-        for key, val in pairs(province_data.a) do
-            M.set_army(v, val - math.floor(val * game_values.nuclear_weapon_damage_radius), key)
-        end
-        if not province_data.water then
-            province_data.p = province_data.p
-             - math.floor(province_data.p * game_values.nuclear_weapon_damage_radius)
-            for i = #province_data.b, 1 do
-                if lume.random() < game_values.nuclear_weapon_destroy_buildings_chance then
-                    table.remove(province_data.b, i)
-                end
-            end
-        end
-    end
 
-    table.insert(game_data.current_explosions, {"nuclear_weapon", to, from_province})
+	for _, v in pairs(get_adjacency(to)) do
+		local province_data = game_data.provinces[v]
+		for key, val in pairs(province_data.a) do
+			M.set_army(v, val - math.floor(val * game_values.nuclear_weapon_damage_radius), key)
+		end
+		if not province_data.water then
+			province_data.p = province_data.p
+			 - math.floor(province_data.p * game_values.nuclear_weapon_damage_radius)
+			for i = #province_data.b, 1 do
+				if lume.random() < game_values.nuclear_weapon_destroy_buildings_chance then
+					table.remove(province_data.b, i)
+				end
+			end
+		end
+	end
+
+	-- Используем переданную провинцию-источник, если она есть
+	if not from_province then
+		-- Для обратной совместимости пытаемся получить провинцию-источник из used_explosions
+		for _, explosion in pairs(game_data.used_explosions) do
+			if explosion[1] == land and explosion[2] == to then
+				from_province = explosion[3]
+				break
+			end
+		end
+		
+		-- Если источник всё ещё не найден, выбираем случайную провинцию страны
+		if not from_province then
+			local attacking_provinces = {}
+			for k, v in pairs(game_data.provinces) do
+				if v.o == land and not v.water then
+					table.insert(attacking_provinces, k)
+				end
+			end
+			
+			if #attacking_provinces > 0 then
+				from_province = attacking_provinces[math.random(#attacking_provinces)]
+			end
+		end
+	end
+
+	table.insert(game_data.current_explosions, {"nuclear_weapon", to, from_province})
 end
 
 function M.army_recruit_cost(land)
