@@ -28,7 +28,7 @@ local tcp_server = nil
 local afk = require "core.server.plugins.afk"
 local plugin = require "core.server.plugins.plugins_manager"
 
-local afk_sec = 10
+local afk_sec = 15
 
 local clients_data = {}
 local clients_ready = {}
@@ -370,13 +370,13 @@ local function register_player(client, client_data, ip)
 		local succes = check_client(client, client_data)
 
 		if not succes then
-			kick(client, "The name is incorrect or a player with that name is already in the game")
+			kick(client, "The name is incorrect or a player with that name is already in the game. Try logging in again after "..afk_sec.." seconds")
 		end
 	elseif not check_uuid then
 		local succes = check_client(client, client_data)
 
 		if not succes then
-			kick(client, "The UUID is incorrect or a player with that UUID is already in the game")
+			kick(client, "The UUID is incorrect or a player with that UUID is already in the game. Try logging in again after "..afk_sec.." seconds")
 		end
 	elseif not check_version then
 		kick(client, "Your game version is too old or new. Server version: "..server_settings.SERVER_VERSION)
