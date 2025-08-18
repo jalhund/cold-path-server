@@ -26,6 +26,7 @@ local tcp_server_require = require "defnet.tcp_server"
 local tcp_server = nil
 
 local plugin = require "core.server.plugins.plugins_manager"
+local afk = require "core.server.plugins.afk"
 
 local clients_data = {}
 local clients_ready = {}
@@ -55,6 +56,23 @@ local function update_players_list()
 		}
 	}
 	tcp_server.broadcast(to_json(t))
+end
+
+local function check_client(client_data)
+	local last_sync = aft.get_last_sync()
+
+	for client, data in pairs(clients_data) do
+		if (data.name == client_data.name or data.uuid == client_data.uuid) and client ~= nil then
+			local last_ping = last_sync[client] and last_sync[client].last_time or 0
+			if socket.gettime() - last_ping > afk_sec then
+				kick(client, "Duplicate player, kicked to allow real player")
+				return true
+			else
+				return false
+			end
+		end
+	end
+	return true
 end
 
 local function free_land(land)
@@ -347,9 +365,17 @@ local function register_player(client, client_data, ip)
 	if not free_land then
 		kick(client, "No free places")
 	elseif not check_name then
-		kick(client, "The name is incorrect or a player with that name is already in the game")
+		local succes = check_client(client_data)
+
+		if not succes then
+			kick(client, "The name is incorrect or a player with that name is already in the game")
+		end
 	elseif not check_uuid then
-		kick(client, "The UUID is incorrect or a player with that UUID is already in the game")
+		local succes = check_client(client_data)
+
+		if not succes then
+			kick(client, "The UUID is incorrect or a player with that UUID is already in the game")
+		end
 	elseif not check_version then
 		kick(client, "Your game version is too old or new. Server version: "..server_settings.SERVER_VERSION)
 	elseif not verification_result then
