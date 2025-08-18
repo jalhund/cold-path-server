@@ -108,11 +108,11 @@ local function kick(client, kick_reason)
 	tcp_server.remove_client(client)
 end
 
-local function check_client(client_data)
+local function check_client(current_client, client_data)
 	local last_sync = afk.get_last_sync()
 
 	for client, data in pairs(clients_data) do
-		if (data.name == client_data.name or data.uuid == client_data.uuid) and client ~= nil then
+		if client ~= current_client and (data.name == client_data.name or data.uuid == client_data.uuid) then
 			local last_ping = last_sync[client] and last_sync[client].last_time or 0
 			if socket.gettime() - last_ping > afk_sec then
 				kick(client, "Duplicate player, kicked to allow real player")
@@ -367,13 +367,13 @@ local function register_player(client, client_data, ip)
 	if not free_land then
 		kick(client, "No free places")
 	elseif not check_name then
-		local succes = check_client(client_data)
+		local succes = check_client(client, client_data)
 
 		if not succes then
 			kick(client, "The name is incorrect or a player with that name is already in the game")
 		end
 	elseif not check_uuid then
-		local succes = check_client(client_data)
+		local succes = check_client(client, client_data)
 
 		if not succes then
 			kick(client, "The UUID is incorrect or a player with that UUID is already in the game")
