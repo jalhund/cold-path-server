@@ -364,9 +364,8 @@ local function register_player(client, client_data, ip)
 	clients_data[client].custom_maps = client_data.custom_maps
 
 	local verification_result, info = plugin.verify_registration(client, client_data)
-	if not free_land then
-		kick(client, "No free places")
-	elseif not check_name then
+
+	if not check_name then
 		local succes = check_client(client, client_data)
 
 		if not succes then
@@ -395,6 +394,7 @@ local function register_player(client, client_data, ip)
 			data = {
 				players_list = M.get_players_list(),
 				commands_list = plugin.commands_list(),
+				commands_info = plugin.commands_info(),
 				game_values = game_values,
 				buildings_data = buildings_data,
 				technology_data = technology_data,
@@ -402,6 +402,15 @@ local function register_player(client, client_data, ip)
 			}
 		}
         tcp_server.send(to_json(t),client)
+
+        if not free_land then
+			local t = {
+				type = "to_spectator_mode",
+			}
+
+			tcp_server.send(to_json(t), client)
+		end
+
 		log("Registered player: ", clients_data[client].uuid, " ", clients_data[client].name, " ", clients_data[client].civilization)
 		plugin.on_player_registered(client)
 		update_players_list()
@@ -714,6 +723,8 @@ local function on_data(data, ip, port, client)
 				M.change_country_name(data.data.land, data.data.new_name, client)
 			elseif data.type == "change_country_color" then
 				M.change_country_color(data.data.land, data.data.new_color, client)
+			elseif data.type == "change_country_banner" then
+				M.change_country_banner(data.data.land, data.data.new_banner, client)
 			end
 		end
 	end)
@@ -1220,14 +1231,11 @@ function M.change_country_name(land, name, client)
 		return
 	end
 
-	game_data.lands[clients_data[client].civilization].name = name
+	if not game_data.lands[land] then
+		return
+	end
 
-	t = {
-		type = "country_name_changed",
-		data = {}
-	}
-
-	tcp_server.urgent_send(to_json(t), client)
+	game_data.lands[land].name = name
 end
 
 function M.change_country_color(land, color, client)
@@ -1237,14 +1245,25 @@ function M.change_country_color(land, color, client)
 		return
 	end
 
-	game_data.lands[clients_data[client].civilization].color = color
+	if not game_data.lands[land] then
+		return
+	end
 
-	t = {
-		type = "country_color_changed",
-		data = {}
-	}
+	game_data.lands[land].color = color
+end
 
-	tcp_server.urgent_send(to_json(t), client)
+function M.change_country_banner(land, banner, client)
+	local client_land = clients_data[client].civilization
+
+	if land ~= client_land then
+		return
+	end
+
+	if not game_data.lands[land] then
+		return
+	end
+
+	game_data.lands[land].banner = banner
 end
 
 return M

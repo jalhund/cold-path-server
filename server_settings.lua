@@ -29,7 +29,15 @@ local t = {
 		welcome = [[Welcome to Official Server #1!
 We ask you to be friendly towards other players.
 If you have questions or want to chat about this game, feel free to join our server on Discord (Settings - Links)]],
-		difficulty = "standard"
+		difficulty = "standard",
+		commands_info = {
+			{text = "/uuid - get your UUID"},
+			{text = "/m - send a private message to a player"},
+			{text = "/players - list of players"},
+			{text = "/slist - list of maps and scenarios"},
+			{text = "/rtr - start a restart vote"},
+			{text = "/vote - vote for/against restart"}
+		},
 	}
 }
 return t
