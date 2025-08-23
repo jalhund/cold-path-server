@@ -347,6 +347,7 @@ function M.urge_allies(land, enemy)
 	for k, v in pairs(game_data.lands[land].allies) do
 		if not game_data.lands[v].defeated then
 			if relations.available_war(v, enemy) then
+				-- offers.register("war", v, enemy)
 				offers.register("invite_war", land, v, enemy)
 			end
 		end
