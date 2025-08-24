@@ -32,6 +32,8 @@ function M.science_per_turn_bonus(land)
         return game_values.ideology.democracy_science_increase_bonus
     elseif i == "monarchy" then
         return game_values.ideology.monarchy_science_increase_bonus
+    elseif i == "theocracy" then
+        return game_values.ideology.theocracy_science_increase_bonus
     end
     return 1
 end

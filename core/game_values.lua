@@ -68,6 +68,8 @@ local t = {
 
 	rebellion_action_duration = 10,
 
+	missile_defense_chance = 0.9,
+
 	ideology_cooldown = 30,
 	ideology = {
 		trade_republic_gold_per_turn_bonus = 2,
@@ -81,6 +83,7 @@ local t = {
 		monarchy_science_increase_bonus = 0.5,
 
 		theocracy_recruit_cost_bonus = 2,
+		theocracy_science_increase_bonus = 0.5,
 
 		communism_damage_to_province = 0.2,
 		communism_damage_to_all_provinces = 0.8,

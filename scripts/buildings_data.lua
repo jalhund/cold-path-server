@@ -90,19 +90,19 @@ local t = {
 			lvl = {
 				[1] = {
 					output = {
-						["gold"] = 250,
+						["gold"] = 500,
 					},
 					cost = 5000,
 				},
 				[2] = {
 					output = {
-						["gold"] = 500,
+						["gold"] = 1500,
 					},
 					cost = 10000,
 				},
 				[3] = {
 					output = {
-						["gold"] = 750,
+						["gold"] = 2500,
 					},
 					cost = 15000,
 				},
@@ -135,6 +135,15 @@ local t = {
 						["science"] = 5,
 					},
 					cost = 100000,
+				},
+				[2] = {
+					input = {
+						["gold"] = 15000
+					},
+					output = {
+						["science"] = 10,
+					},
+					cost = 150000,
 				},
 			}
 		},
@@ -190,6 +199,49 @@ local t = {
 			}
 		},
 		{ 
+			id = "air_defense",
+			lvl = {
+				[1] = {
+					input = {
+						["gold"] = 1000
+					},
+					cost = 15000,
+				},
+				[2] = {
+					input = {
+						["gold"] = 1000
+					},
+					cost = 35000,
+				},
+				[3] = {
+					input = {
+						["gold"] = 1000
+					},
+					cost = 55000,
+				},
+				[4] = {
+					input = {
+						["gold"] = 1000
+					},
+					cost = 75000,
+				},
+				[5] = {
+					input = {
+						["gold"] = 1000
+					},
+					cost = 95000,
+				},
+			}
+		},
+		{
+			id = "missile_defense",
+			lvl = {
+				[1] = {
+					cost = 100000
+				},
+			}
+		},
+		{
 			id = "bridgehead",
 			lvl = {
 				[1] = {
@@ -266,41 +318,6 @@ local t = {
 					air_attack_damage = 10000,
 					break_building_chance = 0.3,
 					cost = 50000,
-				},
-			}
-		},
-		{ 
-			id = "air_defense",
-			lvl = {
-				[1] = {
-					input = {
-						["gold"] = 1000
-					},
-					cost = 15000,
-				},
-				[2] = {
-					input = {
-						["gold"] = 1000
-					},
-					cost = 35000,
-				},
-				[3] = {
-					input = {
-						["gold"] = 1000
-					},
-					cost = 55000,
-				},
-				[4] = {
-					input = {
-						["gold"] = 1000
-					},
-					cost = 75000,
-				},
-				[5] = {
-					input = {
-						["gold"] = 1000
-					},
-					cost = 95000,
 				},
 			}
 		},

@@ -683,10 +683,10 @@ local function on_data(data, ip, port, client)
 				end
 				M.nuclear_weapon(data.data.land, data.data.province)
 			elseif data.type == "vassal" then
-				if not ac.verify_action("vassal", clients_data[client].civilization, data.data.land2) then
+				if not ac.verify_action("vassal", clients_data[client].civilization, data.data.to) then
 					return false
 				end
-				M.vassal(clients_data[client].civilization, data.data.land2)
+				M.vassal(clients_data[client].civilization, data.data.to)
 			elseif data.type == "revolt" then
 				if not ac.verify_action("revolt", data.data.owner, data.data.vassal) then
 					return false

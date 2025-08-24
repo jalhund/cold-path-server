@@ -119,23 +119,23 @@ end
 
 
 local function reciv(client, args)
-	local cl = api.call_function("get_client_by_name", args[2])
-	if cl then
-		local client_uuid = api.get_data("clients_data")[client] and api.get_data("clients_data")[client].uuid
-		local cl_uuid = api.get_data("clients_data")[cl].uuid
+    local cl = api.call_function("get_client_by_name", args[2])
+    if cl then
+        local client_uuid = api.get_data("clients_data")[client] and api.get_data("clients_data")[client].uuid
+        local cl_uuid = api.get_data("clients_data")[cl].uuid
 
-		local province = tracked_provinces[client]
+        local province = tracked_provinces[client]
 
-		if province and game_data.provinces[province] then
-			local t = api.get_data("preferred_civs")
-			t[cl_uuid] = game_data.provinces[province].o
-			api.call_function("chat_message", "Done!", "system", true, client)
-		else
-			api.call_function("chat_message", "Wrong province. Try to use /track to find error", "error", true, client)
-		end
-	else
-		api.call_function("chat_message", "Wrong name", "error", true, client)
-	end
+        if province and game_data.provinces[province] then
+            local t = api.get_data("preferred_civs")
+            t[cl_uuid] = game_data.provinces[province].o
+            api.call_function("chat_message", "Done!", "system", true, client)
+        else
+            api.call_function("chat_message", "Wrong province. Try to use /track to find error", "error", true, client)
+        end
+    else
+        api.call_function("chat_message", "Wrong name", "error", true, client)
+    end
 end
 
 function M.init(_api)
@@ -155,7 +155,7 @@ function M.init(_api)
 end
 
 function M.on_player_joined(client)
-	local t = {
+    local t = {
         type = "enable_selected_province_tracking",
         data = {}
     }
@@ -164,7 +164,7 @@ end
 
 function M.on_data(data, ip, port, client)
     -- Detailed info for admins
-	if data.type == "tracked_province" then
+    if data.type == "tracked_province" then
         if enabled_tracking[client] then
             local text = "Selected province: "..data.data.province
             if not admin_selection[client] then
