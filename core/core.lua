@@ -347,7 +347,7 @@ function M.urge_allies(land, enemy)
 	for k, v in pairs(game_data.lands[land].allies) do
 		if not game_data.lands[v].defeated then
 			if relations.available_war(v, enemy) then
-				offers.register("war", v, enemy)
+				offers.register("invite_war", land, v, enemy)
 			end
 		end
 	end
@@ -485,13 +485,16 @@ function M.accept_offer(offer_id)
 			log("Trade unavailable. Ignore")
 		end
 	elseif offer[2] == "vassal" then
-		if relations.available_vassal(offer[3], offer[4]) then
-			relations.register_vassal(offer[3], offer[4])
-			accept_offer_callback(offer)
-			log("Register vassalage")
-		else
-			log("vassalage unavailable. Ignore")
-		end
+		-- if relations.available_vassal(offer[3], offer[4]) then
+		-- 	relations.register_vassal(offer[3], offer[4])
+		-- 	accept_offer_callback(offer)
+		-- 	log("Register vassalage")
+		-- else
+		-- 	log("vassalage unavailable. Ignore")
+		-- end
+		relations.register_vassal(offer[3], offer[4])
+		accept_offer_callback(offer)
+		log("Register vassalage")
 	elseif offer[2] == "discontent_pay_off" then
 		-- print("Pay off: ", offer[5])
 		game_data.lands[offer[4]].money = game_data.lands[offer[4]].money - offer[5]
@@ -508,6 +511,13 @@ function M.accept_offer(offer_id)
 		update_land_data(offer[4])
 	elseif offer[2] == "discontent_independence" then
 		offers.register("war", offer[4], offer[3])
+	elseif offer[2] == "invite_war" then
+		if relations.available_war(offer[3], offer[4]) then
+			relations.register_war(offer[3], offer[4])
+			if lume.match(game_data.lands[offer[4]].bonuses, function(x) return x[1] == "consequence" end) then
+				game_data.consequence_data[offer[3]] = game_values.consequence_time
+			end
+		end
 	end
 end
 

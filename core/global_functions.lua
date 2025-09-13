@@ -542,6 +542,13 @@ function air_available(land, from, to)
 	return false
 end
 
+function missile_protected(land, province)
+	if not game_data.provinces[province].water and game_data.provinces[province].b.missile_defense then
+		return true, province
+	end
+	return false
+end
+
 function is_capital(province)
 	for k, v in pairs(game_data.lands) do
 		if not v.defeated and v.capital == province then

@@ -188,7 +188,7 @@ local t = {
 	t_14_1 = {
 		cost = 160.8,
 		requirements = {"t_13_2"},
-		bonuses = {{"building_science_center"}}
+		bonuses = {{"building_science_center_1"}}
 	},
 	t_14_2 = {
 		cost = 160.8,
@@ -219,6 +219,11 @@ local t = {
 		cost = 219.9,
 		requirements = {"t_14_3"},
 		bonuses = {{"building_chemical_factory"}}
+	},
+	t_15_5 = {
+		cost = 219.9,
+		requirements = {"t_14_1"},
+		bonuses = {{"building_science_center_2"}}
 	},
 	t_16_1 = {
 		cost = 300.9,
@@ -294,10 +299,10 @@ local t = {
 		requirements = {"t_19_3"},
 		bonuses = {{"building_aerodrome_5"}}
 	},
-	t_21_2 = {
-		cost = 100000,-- 1441.6,
-		requirements = {"t_20_1","t_20_2","t_20_3"},
-		bonuses = {}
+	t_20_4 = {
+		cost = 1053,-- 1441.6,
+		requirements = {"t_19_2"},
+		bonuses = {{"building_missile_defense"}}
 	},
 }
 return t

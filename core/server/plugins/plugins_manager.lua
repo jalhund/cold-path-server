@@ -4,6 +4,8 @@ local M = {}
 -- chat_function(message_text, just_for_host, client)
 -- kick_function(client, reason)
 
+local server_settings = require "server_settings"
+
 local plugins_list = {
 	system = {
 		data = require "core.server.plugins.system",
@@ -268,6 +270,11 @@ function M.commands_list(client)
 		table.insert(cmd_list, k)
 	end
 	return cmd_list
+end
+
+function M.commands_info()
+	local t = deepcopy(server_settings.plugin)
+	return t.commands_info
 end
 
 return M

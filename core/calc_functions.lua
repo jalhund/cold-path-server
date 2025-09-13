@@ -112,7 +112,8 @@ local function calc_move()
 		elseif v[2] == "chemical" then
 			army_functions.chemical(v[1], v[3], v[4])
 		elseif v[2] == "nuclear" then
-			army_functions.nuclear(v[1], v[3])
+			local from_province = v[4] -- Получаем провинцию-источник из очереди
+			army_functions.nuclear(v[1], v[3], from_province) -- Передаем провинцию-источник
 		end
 	end
 	game_data.queue = {}

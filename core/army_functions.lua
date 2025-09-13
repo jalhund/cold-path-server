@@ -281,7 +281,14 @@ function M.chemical(land, from, to)
 	table.insert(game_data.current_chemical, {from,to,  land})
 end
 
-function M.nuclear(land, to, from_province)
+function M.nuclear(land, to, from)
+	local protected, province = missile_protected(land, to)
+
+	if protected then
+		table.insert(game_data.current_explosions, {"nuclear_weapon_fail", to, from})
+		return
+	end
+	
 	game_data.provinces[to].a = {}
 	game_data.lands[game_data.provinces[to].o].last_attacked = land
 	game_data.provinces[to].o = "Undeveloped_land"
@@ -306,31 +313,29 @@ function M.nuclear(land, to, from_province)
 	end
 
 	-- Используем переданную провинцию-источник, если она есть
-	if not from_province then
+	if from then
+		-- print("ОТЛАДКА ЯДЕРНОЙ АТАКИ: Используем переданную провинцию-источник: " .. from)
+	else
 		-- Для обратной совместимости пытаемся получить провинцию-источник из used_explosions
+		-- print("ОТЛАДКА ЯДЕРНОЙ АТАКИ: Поиск источника запуска в used_explosions, количество записей: " .. #game_data.used_explosions)
+		
 		for _, explosion in pairs(game_data.used_explosions) do
+			-- print("ОТЛАДКА ЯДЕРНОЙ АТАКИ: Проверка записи:", explosion[1], explosion[2])
 			if explosion[1] == land and explosion[2] == to then
-				from_province = explosion[3]
+				from = explosion[3]
+				-- print("ОТЛАДКА ЯДЕРНОЙ АТАКИ: Найден источник запуска: " .. tostring(from))
 				break
 			end
 		end
-		
-		-- Если источник всё ещё не найден, выбираем случайную провинцию страны
-		if not from_province then
-			local attacking_provinces = {}
-			for k, v in pairs(game_data.provinces) do
-				if v.o == land and not v.water then
-					table.insert(attacking_provinces, k)
-				end
-			end
-			
-			if #attacking_provinces > 0 then
-				from_province = attacking_provinces[math.random(#attacking_provinces)]
-			end
-		end
+	end
+	
+	if from then
+		-- print("ОТЛАДКА ЯДЕРНОЙ АТАКИ: Добавляем в current_explosions с источником: " .. from)
+	else
+		-- print("ОТЛАДКА ЯДЕРНОЙ АТАКИ: Источник не найден, добавляем без него")
 	end
 
-	table.insert(game_data.current_explosions, {"nuclear_weapon", to, from_province})
+	table.insert(game_data.current_explosions, {"nuclear_weapon", to, from})
 end
 
 function M.army_recruit_cost(land)

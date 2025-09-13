@@ -25,7 +25,10 @@ local host_is_ready = false
 local tcp_server_require = require "defnet.tcp_server"
 local tcp_server = nil
 
+local afk = require "core.server.plugins.afk"
 local plugin = require "core.server.plugins.plugins_manager"
+
+local afk_sec = 15
 
 local clients_data = {}
 local clients_ready = {}
@@ -91,6 +94,37 @@ local function find_free_land(uuid)
 	end
 end
 
+local function kick(client, kick_reason)
+	if kick_reason then
+		local kick_info = {
+			type = "kick",
+			data = {
+				reason = kick_reason
+			}
+		}
+		tcp_server.urgent_send(to_json(kick_info), client)
+	end
+	log("Kick client: ", client, " by reason: ", kick_reason)
+	tcp_server.remove_client(client)
+end
+
+local function check_client(current_client, client_data)
+	local last_sync = afk.get_last_sync()
+
+	for client, data in pairs(clients_data) do
+		if client ~= current_client and (data.name == client_data.name or data.uuid == client_data.uuid) then
+			local last_ping = last_sync[client] and last_sync[client].last_time or 0
+			if socket.gettime() - last_ping > afk_sec then
+				kick(client, "Duplicate player, kicked to allow real player")
+				return true
+			else
+				return false
+			end
+		end
+	end
+	return true
+end
+
 local function check_name(name)
 	if name == "" then
 		return false
@@ -131,20 +165,6 @@ local function check_version(version)
 		return true
 	end
 	return false
-end
-
-local function kick(client, kick_reason)
-	if kick_reason then
-		local kick_info = {
-			type = "kick",
-			data = {
-				reason = kick_reason
-			}
-		}
-		tcp_server.urgent_send(to_json(kick_info), client)
-	end
-	log("Kick client: ", client, " by reason: ", kick_reason)
-	tcp_server.remove_client(client)
 end
 
 --local stat = require "scripts.sarah.statistics"
@@ -344,12 +364,19 @@ local function register_player(client, client_data, ip)
 	clients_data[client].custom_maps = client_data.custom_maps
 
 	local verification_result, info = plugin.verify_registration(client, client_data)
-	if not free_land then
-		kick(client, "No free places")
-	elseif not check_name then
-		kick(client, "The name is incorrect or a player with that name is already in the game")
+
+	if not check_name then
+		local succes = check_client(client, client_data)
+
+		if not succes then
+			kick(client, "The name is incorrect or a player with that name is already in the game. Try logging in again after "..afk_sec.." seconds")
+		end
 	elseif not check_uuid then
-		kick(client, "The UUID is incorrect or a player with that UUID is already in the game")
+		local succes = check_client(client, client_data)
+
+		if not succes then
+			kick(client, "The UUID is incorrect or a player with that UUID is already in the game. Try logging in again after "..afk_sec.." seconds")
+		end
 	elseif not check_version then
 		kick(client, "Your game version is too old or new. Server version: "..server_settings.SERVER_VERSION)
 	elseif not verification_result then
@@ -367,6 +394,7 @@ local function register_player(client, client_data, ip)
 			data = {
 				players_list = M.get_players_list(),
 				commands_list = plugin.commands_list(),
+				commands_info = plugin.commands_info(),
 				game_values = game_values,
 				buildings_data = buildings_data,
 				technology_data = technology_data,
@@ -374,6 +402,15 @@ local function register_player(client, client_data, ip)
 			}
 		}
         tcp_server.send(to_json(t),client)
+
+        if not free_land then
+			local t = {
+				type = "to_spectator_mode",
+			}
+
+			tcp_server.send(to_json(t), client)
+		end
+
 		log("Registered player: ", clients_data[client].uuid, " ", clients_data[client].name, " ", clients_data[client].civilization)
 		plugin.on_player_registered(client)
 		update_players_list()
@@ -646,10 +683,10 @@ local function on_data(data, ip, port, client)
 				end
 				M.nuclear_weapon(data.data.land, data.data.province)
 			elseif data.type == "vassal" then
-				if not ac.verify_action("vassal", clients_data[client].civilization, data.data.land2) then
+				if not ac.verify_action("vassal", clients_data[client].civilization, data.data.to) then
 					return false
 				end
-				M.vassal(clients_data[client].civilization, data.data.land2)
+				M.vassal(clients_data[client].civilization, data.data.to)
 			elseif data.type == "revolt" then
 				if not ac.verify_action("revolt", data.data.owner, data.data.vassal) then
 					return false
@@ -686,6 +723,8 @@ local function on_data(data, ip, port, client)
 				M.change_country_name(data.data.land, data.data.new_name, client)
 			elseif data.type == "change_country_color" then
 				M.change_country_color(data.data.land, data.data.new_color, client)
+			elseif data.type == "change_country_banner" then
+				M.change_country_banner(data.data.land, data.data.new_banner, client)
 			end
 		end
 	end)
@@ -1192,14 +1231,11 @@ function M.change_country_name(land, name, client)
 		return
 	end
 
-	game_data.lands[clients_data[client].civilization].name = name
+	if not game_data.lands[land] then
+		return
+	end
 
-	t = {
-		type = "country_name_changed",
-		data = {}
-	}
-
-	tcp_server.urgent_send(to_json(t), client)
+	game_data.lands[land].name = name
 end
 
 function M.change_country_color(land, color, client)
@@ -1209,14 +1245,25 @@ function M.change_country_color(land, color, client)
 		return
 	end
 
-	game_data.lands[clients_data[client].civilization].color = color
+	if not game_data.lands[land] then
+		return
+	end
 
-	t = {
-		type = "country_color_changed",
-		data = {}
-	}
+	game_data.lands[land].color = color
+end
 
-	tcp_server.urgent_send(to_json(t), client)
+function M.change_country_banner(land, banner, client)
+	local client_land = clients_data[client].civilization
+
+	if land ~= client_land then
+		return
+	end
+
+	if not game_data.lands[land] then
+		return
+	end
+
+	game_data.lands[land].banner = banner
 end
 
 return M
