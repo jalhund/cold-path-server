@@ -285,23 +285,29 @@ local custom_map_hash
 
 local function prepare_map_files()
     local t = {}
+    local map_info_raw = get_file_data("map_info.json")
+    if not map_info_raw then
+        print("file error: map_info.json")
+        return
+    end
+
+    local province_data_file = "province_data.bin"
+    local ok, map_info = pcall(json.decode, map_info_raw)
+    if ok and type(map_info) == "table" and type(map_info.province_data_file) == "string" and map_info.province_data_file ~= "" then
+        province_data_file = map_info.province_data_file
+    end
+
+    local province_data_raw = get_file_data(province_data_file)
+    if not province_data_raw then
+        print("file error: ", province_data_file)
+        return
+    end
+
     t["adjacency.dat"] = get_file_data("adjacency.dat")
-    t["map_info.json"] = get_file_data("map_info.json")
+    t["map_info.json"] = map_info_raw
     t["offsets.json"] = get_file_data("offsets.json")
     t["scenario.json"] = get_file_data("scenario.json")
-    local n = lume.count(game_data.provinces)
-    t.blurred_data = {}
-    for i=1, n do
-        t.blurred_data[i] = get_file_data("blurred_data/"..i)
-    end
-    t.generated_data = {}
-    for i=1, n do
-        t.generated_data[i] = get_file_data("generated_data/"..i)
-    end
-    t.description = {}
-    for i=1, n do
-        t.description[i] = get_file_data("description/"..i)
-    end
+    t[province_data_file] = province_data_raw
     local mp = require "scripts.utils.message_pack"
     local d = mp.pack(t)
     print("map data std size:",#d)
