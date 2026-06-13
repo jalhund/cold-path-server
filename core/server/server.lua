@@ -17,6 +17,7 @@ local timer_module = require "core.timer"
 local timer_instance
 
 local server_settings = require "server_settings"
+local map_package = require "scripts.map_package"
 
 local HOST_IS_PLAYER = false
 local HOST_CIVILIZATION = nil
@@ -263,62 +264,37 @@ local function send_game_data(client, draw)
 	-- stat.remove_state("send_game_data")
 end
 
-local function get_file_data(name)
-    local path
+local function get_custom_map_package_path()
     if HOST_IS_PLAYER then
-        path = debug_game_mode_file_path.."exported_map/"
-    else
-        path = "maps/"..game_data.map.."/"
+        return (debug_game_mode_file_path or "").."exported_map.map"
     end
-    local file = io.open(path..name,"rb")
-    if not file then
-        print("file error: ", path, name)
-        return
-    end
-    local data = file:read("*a")
-    file:close()
-    return data
+    return "maps/"..tostring(game_data.map)..".map"
 end
 
 local prepared_map_files
 local custom_map_hash
 
 local function prepare_map_files()
-    local t = {}
-    local map_info_raw = get_file_data("map_info.json")
-    if not map_info_raw then
-        print("file error: map_info.json")
+    local package_path = get_custom_map_package_path()
+    if not package_path then
+        print("file error: custom map package path not found")
         return
     end
 
-    local province_data_file = "province_data.bin"
-    local ok, map_info = pcall(json.decode, map_info_raw)
-    if ok and type(map_info) == "table" and type(map_info.province_data_file) == "string" and map_info.province_data_file ~= "" then
-        province_data_file = map_info.province_data_file
-    end
-
-    local province_data_raw = get_file_data(province_data_file)
-    if not province_data_raw then
-        print("file error: ", province_data_file)
+    local package_data, err = map_package.read_package(package_path)
+    if not package_data then
+        print("file error:", package_path, err)
         return
     end
 
-    t["adjacency.dat"] = get_file_data("adjacency.dat")
-    t["map_info.json"] = map_info_raw
-    t["offsets.json"] = get_file_data("offsets.json")
-    t["scenario.json"] = get_file_data("scenario.json")
-    t[province_data_file] = province_data_raw
-    local mp = require "scripts.utils.message_pack"
-    local d = mp.pack(t)
-    print("map data std size:",#d)
-	local dt = mp.unpack(d)
-    d = lualzw.compress(d)
-    print("compressed",#d)
-    
+    local d = lualzw.compress(package_data.bytes)
+    print("map package size:", #package_data.bytes)
+    print("compressed", #d)
+
     local luaxxhash = require "luaxxhash"
     custom_map_hash = luaxxhash(d)
     prepared_map_files = base64.encode(d)
-    print("base64",#prepared_map_files)
+    print("base64", #prepared_map_files)
 end
 
 local function send_map_data(client)

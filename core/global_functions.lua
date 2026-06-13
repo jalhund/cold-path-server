@@ -2,6 +2,7 @@ local M = {}
 
 adjacency_map = {}
 local json = require "scripts.utils.json"
+local map_package = require "scripts.map_package"
 army_functions = require "core.army_functions"
 local relations = require "core.relations"
 
@@ -188,9 +189,9 @@ function load_adjacency(debug_mode, custom_path)
 		path = "assets/adjacency_map_europe_remastered.dat"
 	else
 	    if not network.is_console()  then
-            path = debug_game_mode_file_path.."exported_map/adjacency.dat"
+            path = (debug_game_mode_file_path or "").."exported_map.map"
         else
-            path = "maps/"..game_data.map.."/adjacency.dat"
+            path = "maps/"..game_data.map..".map"
         end
 	end
 
@@ -201,7 +202,13 @@ function load_adjacency(debug_mode, custom_path)
 		end
 	end
     log("Load adjacency path is: ", path)
-	if network.is_console() or debug_mode then
+	if map_package.is_package_path(path) then
+		local err
+		data, err = map_package.read_section_bytes(path, "adjacency")
+		if not data then
+			error("Error open adjacency: "..tostring(path).."#adjacency ("..tostring(err)..")")
+		end
+	elseif network.is_console() or debug_mode then
 		local file = io.open(path, "r")
 		data = file:read("*a")
 		file:close()

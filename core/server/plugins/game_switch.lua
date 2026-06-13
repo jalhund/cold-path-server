@@ -205,7 +205,7 @@ function M.game_over(land, win)
 		validate_scenario.validate(game_data)
 		print("load adjacency")
 		if game_data.custom_map then
-            load_adjacency(true, "maps/"..game_data.map.."/adjacency.dat")
+            load_adjacency(true, "maps/"..game_data.map..".map")
         else
             load_adjacency()
         end

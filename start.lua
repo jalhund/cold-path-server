@@ -12,7 +12,7 @@ validate_scenario.validate(game_data)
 
 if game_data.custom_map then
     print("custom map")
-    load_adjacency(true, "maps/"..game_data.map.."/adjacency.dat")
+    load_adjacency(true, "maps/"..game_data.map..".map")
 else
     load_adjacency()
 end
