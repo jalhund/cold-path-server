@@ -434,6 +434,12 @@ local function next()
 				-- end
 			end
 		end
+		-- Espionage: the notification queue has now been broadcast to every client;
+		-- clear it so it is not re-sent next turn. When the host is a player, its own
+		-- UI drains the shared queue instead (see hide_because_next).
+		if not HOST_IS_PLAYER then
+			game_data.espionage_notifications = {}
+		end
 		lume.clear(clients_ready)
 		host_is_ready = false
 		tcp_server.broadcast(to_json({type = "finish_next", data = {}}))
@@ -609,6 +615,10 @@ local function on_data(data, ip, port, client)
 					return false
 				end
 				core.set_tax(data.data.land, data.data.tax)
+			elseif data.type == "set_counter_intelligence" then
+				core.set_counter_intelligence(data.data.land, data.data.value)
+			elseif data.type == "espionage" then
+				core.espionage(data.data.land, data.data.op, data.data.target_province, data.data.chosen_building)
 			elseif data.type == "set_ideology" then
 				if not ac.verify_action("set_ideology", data.data.land, data.data.ideology) then
 					return false
@@ -1116,6 +1126,14 @@ end
 
 function M.set_ideology(land, ideology)
 	core.set_ideology(land, ideology)
+end
+
+function M.set_counter_intelligence(land, value)
+	core.set_counter_intelligence(land, value)
+end
+
+function M.espionage(land, op, target_province, chosen_building)
+	return core.espionage(land, op, target_province, chosen_building)
 end
 
 function M.build(land, province, building_id)

@@ -101,6 +101,10 @@ local function calc_building(province_id, province_data, building_data, n, build
 		
 					game_data.lands[province_data.o].science_per_turn.buildings = game_data.lands[province_data.o].science_per_turn.buildings +
 						science_per_turn
+				elseif k == "intelligence" then
+					-- Intelligence buildings give a flat amount each (no diminishing returns).
+					game_data.lands[province_data.o].intelligence_per_turn.buildings =
+						game_data.lands[province_data.o].intelligence_per_turn.buildings + res
 				end
 			elseif action == "resource" then
 				local res = v * input_factor
@@ -144,6 +148,8 @@ function M.calc_buildings()
 	calc_type_buildings("heavy_water_plant")
 	calc_type_buildings("nuclear_reactor")
 	calc_type_buildings("fusion_reactor")
+	calc_type_buildings("intelligence_agency")
+	calc_type_buildings("intelligence_center")
 end
 
 return M

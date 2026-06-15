@@ -415,7 +415,8 @@ local function calc_economy(is_player, difficulty_list)
 				army = 0,
 				buildings = 0,
 				trade = 0,
-				vassality = 0
+				vassality = 0,
+				counter_intelligence = 0
 			},
 			inflation = 0,
 			income_total = 0,
@@ -518,7 +519,15 @@ local function calc_balance()
 	for k, v in pairs(game_data.lands) do
 		v.economy.income_total = v.economy.income.population + v.economy.income.technology + v.economy.income.skills +
 		v.economy.income.buildings  + v.economy.income.trade
+		-- Counter-intelligence costs a share of gross income per turn (espionage system only).
+		if game_data.espionage_enabled and v.economy.income_total > 0 then
+			v.economy.expense.counter_intelligence = (v.counter_intelligence or game_values.espionage.counter_intelligence_default)
+				* v.economy.income_total
+		else
+			v.economy.expense.counter_intelligence = 0
+		end
 		v.economy.expense_total = v.economy.expense.army + v.economy.expense.buildings + v.economy.expense.trade
+			+ v.economy.expense.counter_intelligence
 		v.economy.inflation = calc_inflation(k)
 		-- print("Inflation is: ", v.economy.inflation)
 		-- print("Inflation: Without and with: ", v.economy.income_total, game_data.lands[k].money,
@@ -658,6 +667,29 @@ local function calc_pacts()
 	end
 end
 
+local function calc_intelligence_reset()
+	for k, v in pairs(game_data.lands) do
+		v.intelligence = v.intelligence or 0
+		v.intelligence_per_turn = {
+			buildings = 0
+		}
+		v.total_intelligence_per_turn = 0
+	end
+end
+
+local function calc_intelligence_apply()
+	for k, v in pairs(game_data.lands) do
+		v.total_intelligence_per_turn = v.intelligence_per_turn.buildings
+		v.intelligence = v.intelligence + v.total_intelligence_per_turn
+	end
+end
+
+-- Triggers a rebellion in `land` immediately (used by the espionage "incite
+-- rebellion" operation). Returns the new rebel land id, or nil if none was created.
+function M.force_rebellion(land)
+	return generate_new_land(land)
+end
+
 function M.calc_lands(game_end_callback, is_player, difficulty_list)
 	-- game_data.previous_moves = {}
 	calc_recruit()
@@ -672,9 +704,11 @@ function M.calc_lands(game_end_callback, is_player, difficulty_list)
 	ideology.handle_defeat(game_end_callback)
 	calc_num_of_provinces()
 	calc_science()
+	calc_intelligence_reset()
 	calc_skills()
 	calc_movement_points()
 	buildings_calc_functions.calc_buildings()
+	calc_intelligence_apply()
 	calc_balance()
 	calc_stability(difficulty_list)
 	calc_technology()

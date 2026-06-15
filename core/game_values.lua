@@ -98,5 +98,30 @@ local t = {
 		anarchism_war_weariness_mod = 2,
 		anarchism_inflation_mod = 5
 	},
+
+	espionage = {
+		-- Flat intelligence income from the agency (also baked into buildings_data output).
+		intelligence_agency_income = 5,
+		intelligence_center_income = 1,
+
+		-- Counter-intelligence slider (fraction of gross income spent per turn).
+		counter_intelligence_default = 0.05,
+		counter_intelligence_min = 0,
+		counter_intelligence_max = 0.5,
+		counter_intelligence_step = 0.01,
+
+		-- Operation costs, in intelligence points.
+		op_cost = {
+			scout_troops = 5,
+			sabotage_building = 10,
+			steal_technology = 15,
+			incite_rebellion = 25,
+		},
+
+		-- AI counter-intelligence budgeting.
+		ai_counter_intelligence_peace = 0.05,
+		ai_counter_intelligence_threat = 0.2,
+		ai_counter_intelligence_high_threat = 0.25,
+	},
 }
 return t

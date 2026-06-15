@@ -8,6 +8,7 @@ local core = require "core.core"
 local offers = require "core.offers"
 local balance_of_power = require "core.ai.balance_of_power"
 local buildings = require "core.ai.buildings"
+local espionage_ai = require "core.ai.espionage_ai"
 local difficulty
 
 local scenarios_modifiers = {
@@ -208,6 +209,7 @@ local function universal_ai_actions(land)
 			core.revolt(game_data.lands[land].vassal, land)
 		end
 	end
+	espionage_ai.maybe_operate(land)
 end
 
 local function get_advantage(land)
@@ -322,6 +324,9 @@ local function calc_expenses(land)
 	ai_utils.balance_army(land, army_budget * game_values.army_cost, difficulty)
 
 	buildings.build(land, budget)
+
+	espionage_ai.set_budget(land)
+	espionage_ai.maybe_build_agency(land)
 
 	-- no_enemies means that there is no enemies or civilization can't attack enemy
 	if ai_utils.no_enemies(land) and #game_data.lands[land].enemies > 1 then

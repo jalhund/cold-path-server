@@ -315,6 +315,19 @@ function M.validate(t)
 
 	t.dissolved_army_for_gold = {}
 
+	-- Espionage system toggle (DLC «Шпионаж»). When active, all countries use
+	-- intelligence points, counter-intelligence spending and secret operations.
+	if t.espionage_enabled == nil then
+		t.espionage_enabled = true
+	end
+
+	-- Espionage: per-organizer scouting snapshots, valid only for the current turn.
+	-- t.espionage_scouted[organizer][province] = { owner = count, ... }
+	t.espionage_scouted = {}
+
+	-- Espionage: target-side notifications queued for the player, drained each turn.
+	t.espionage_notifications = {}
+
 	for k, v in pairs(t.lands) do
 		v.ideology = "republic"
 		v.changed_ideology = -50
@@ -337,7 +350,8 @@ function M.validate(t)
 				army = 0,
 				buildings = 0,
 				trade = 0,
-				vassality = 0
+				vassality = 0,
+				counter_intelligence = 0
 			},
 			inflation = 0,
 			income_total = 0,
@@ -352,6 +366,13 @@ function M.validate(t)
 		}
 		v.total_science_per_turn = 0
 		v.science = 0
+		-- Espionage
+		v.intelligence = 0
+		v.intelligence_per_turn = {
+			buildings = 0
+		}
+		v.total_intelligence_per_turn = 0
+		v.counter_intelligence = game_values.espionage.counter_intelligence_default
 		v.skills = 0
 		v.movement_points = 0
 		v.total_movement_points = 0

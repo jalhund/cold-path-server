@@ -4,6 +4,7 @@ local calc_functions = require "core.calc_functions"
 local relations = require "core.relations"
 local offers = require "core.offers"
 local event_system = require "core.event_system"
+local espionage = require "core.espionage"
 local scenarios_modifiers = {
 	consequences = require "scripts.scenarios_modifiers.consequences"
 }
@@ -74,6 +75,9 @@ function M.next()
 	game_data.used_chemical = {}
 	game_data.used_explosions = {}
 	game_data.used_planes = {}
+
+	-- Scouting snapshots only last for the turn in which they were taken.
+	espionage.clear_scouting()
 
 	army_functions.validate_army()
 
@@ -203,6 +207,22 @@ function M.build(land, province, building_id)
 	if scenarios_modifiers[game_data.id] then
 		scenarios_modifiers[game_data.id].build(land, province, building_id)
 	end
+end
+
+-- Authoritative espionage operation (single-player / multiplayer server). Rolls
+-- the counter-intelligence outcome and applies the effect. Returns the result
+-- table, or an availability table { ok = false, reason = ... } when not allowed.
+function M.espionage(organizer, op, target_province, chosen_building)
+	return espionage.perform(organizer, op, target_province, chosen_building)
+end
+
+function M.set_counter_intelligence(land, value)
+	if value < game_values.espionage.counter_intelligence_min then
+		value = game_values.espionage.counter_intelligence_min
+	elseif value > game_values.espionage.counter_intelligence_max then
+		value = game_values.espionage.counter_intelligence_max
+	end
+	game_data.lands[land].counter_intelligence = value
 end
 
 function M.destroy(land, province, building_id)

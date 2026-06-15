@@ -351,6 +351,38 @@ local t = {
 			},
 		},
 	},
+	espionage = {
+		{
+			id = "intelligence_agency",
+			lvl = {
+				[1] = {
+					-- Maintenance. One per country (limit enforced in build logic).
+					-- Unlocks all espionage operations and gives a flat intelligence income.
+					input = {
+						["gold"] = 10000,
+					},
+					output = {
+						["intelligence"] = 5,
+					},
+					cost = 100000,
+				},
+			}
+		},
+		{
+			id = "intelligence_center",
+			lvl = {
+				[1] = {
+					input = {
+						["gold"] = 1000,
+					},
+					output = {
+						["intelligence"] = 1,
+					},
+					cost = 10000,
+				},
+			}
+		},
+	},
 	other = {
 		{
 			id = "port",

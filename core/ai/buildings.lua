@@ -140,6 +140,9 @@ function M.build(land, budget)
     end
 
     for k, v in pairs(buildings_data) do
+        -- Skip categories without an AI build profile / budget (e.g. espionage,
+        -- which the AI manages through its dedicated espionage logic).
+        if buildings[k] and budget[k.."_buildings"] then
         local b = game_data.lands[land].money * budget[k.."_buildings"]
         -- print("Budget for: ", land, k, b)
         local building = lume.weightedchoice(buildings[k].priority)
@@ -176,6 +179,7 @@ function M.build(land, budget)
                 local building_for_destroy = lume.weightedchoice(game_data.provinces[province].b)
                 core.destroy(land, province, building_for_destroy)
             end
+        end
         end
 
     end
