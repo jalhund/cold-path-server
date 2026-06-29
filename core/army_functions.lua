@@ -225,6 +225,33 @@ function M.tank(land, from, to)
 	table.insert(game_data.current_tank, {from,to,  land})
 end
 
+function M.drone(land, from, to)
+	print("Army function Drone: ", land, from, to)
+	local amount = game_values.drone_damage
+	for k, v in pairs(game_data.provinces[to].a) do
+		local damage = amount
+		local damage_bonus = 1/M.calc_provincial_defense(to)
+		damage_bonus = damage_bonus*M.calc_army_attack_bonus(land, from, k)
+		damage_bonus = damage_bonus/M.calc_army_defense_bonus(k)
+		if math.floor(damage * damage_bonus) > v then
+			damage = math.floor(v/damage_bonus)
+		end
+		amount = amount - damage
+		M.set_army(to, v - math.floor(damage * damage_bonus), k)
+		if amount < 0 then
+			print("Set amount = 0", from, to, amount, land)
+			amount = 0
+		end
+	end
+	if game_data.provinces[to].b.fortress then
+		game_data.provinces[to].b.fortress = game_data.provinces[to].b.fortress - 2
+		if game_data.provinces[to].b.fortress <= 0 then
+			game_data.provinces[to].b.fortress = nil
+		end
+	end
+	table.insert(game_data.current_drone, {from,to,  land})
+end
+
 function M.air_attack(land, from, to)
 	local lvl = game_data.provinces[from].b.aerodrome
 	if not lvl then

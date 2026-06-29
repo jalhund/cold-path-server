@@ -64,6 +64,8 @@ function M.next()
 	game_data.current_shell = {}
 	game_data.previous_tank = deepcopy(game_data.current_tank)
 	game_data.current_tank = {}
+	game_data.previous_drone = deepcopy(game_data.current_drone)
+	game_data.current_drone = {}
 	game_data.previous_chemical = deepcopy(game_data.current_chemical)
 	game_data.current_chemical = {}
 	game_data.previous_explosions = deepcopy(game_data.current_explosions)
@@ -72,6 +74,7 @@ function M.next()
 	game_data.current_planes = {}
 	game_data.used_shell = {}
 	game_data.used_tank = {}
+	game_data.used_drone = {}
 	game_data.used_chemical = {}
 	game_data.used_explosions = {}
 	game_data.used_planes = {}
@@ -138,6 +141,9 @@ function M.next()
 end
 
 function M.recruit(land,province, count)
+	if game_data.lands[land].ideology == "technocracy" then
+		return
+	end
 	game_data.provinces[province].l_a = game_data.provinces[province].l_a + count
 	game_data.provinces[province].p = game_data.provinces[province].p - count
 	game_data.lands[land].money = game_data.lands[land].money - count/army_functions.army_recruit_cost(land)
@@ -207,22 +213,6 @@ function M.build(land, province, building_id)
 	if scenarios_modifiers[game_data.id] then
 		scenarios_modifiers[game_data.id].build(land, province, building_id)
 	end
-end
-
--- Authoritative espionage operation (single-player / multiplayer server). Rolls
--- the counter-intelligence outcome and applies the effect. Returns the result
--- table, or an availability table { ok = false, reason = ... } when not allowed.
-function M.espionage(organizer, op, target_province, chosen_building)
-	return espionage.perform(organizer, op, target_province, chosen_building)
-end
-
-function M.set_counter_intelligence(land, value)
-	if value < game_values.espionage.counter_intelligence_min then
-		value = game_values.espionage.counter_intelligence_min
-	elseif value > game_values.espionage.counter_intelligence_max then
-		value = game_values.espionage.counter_intelligence_max
-	end
-	game_data.lands[land].counter_intelligence = value
 end
 
 function M.destroy(land, province, building_id)
@@ -310,6 +300,13 @@ function M.tank(land, from, to)
 	game_data.lands[land].movement_points = game_data.lands[land].movement_points - 1
 end
 
+function M.drone(land, from, to)
+	game_data.lands[land].resources.drone = (game_data.lands[land].resources.drone or 0) - 1
+	table.insert(game_data.used_drone, {land, to})
+	table.insert(game_data.queue, { land, "drone", from, to})
+	game_data.lands[land].movement_points = game_data.lands[land].movement_points - 1
+end
+
 function M.chemical_weapon(land, from, to)
 	local from_province = from
 	local province = to
@@ -378,6 +375,22 @@ function M.support_revolt(from, to, value)
 	table.insert(game_data.lands[to].rebellion_support, {
 		from, value, game_data.step
 	})
+end
+
+-- Authoritative espionage operation (single-player / multiplayer server). Rolls
+-- the counter-intelligence outcome and applies the effect. Returns the result
+-- table, or an availability table { ok = false, reason = ... } when not allowed.
+function M.espionage(organizer, op, target_province, chosen_building)
+	return espionage.perform(organizer, op, target_province, chosen_building)
+end
+
+function M.set_counter_intelligence(land, value)
+	if value < game_values.espionage.counter_intelligence_min then
+		value = game_values.espionage.counter_intelligence_min
+	elseif value > game_values.espionage.counter_intelligence_max then
+		value = game_values.espionage.counter_intelligence_max
+	end
+	game_data.lands[land].counter_intelligence = value
 end
 
 function M.accept_offer(offer_id)
@@ -532,12 +545,7 @@ function M.accept_offer(offer_id)
 	elseif offer[2] == "discontent_independence" then
 		offers.register("war", offer[4], offer[3])
 	elseif offer[2] == "invite_war" then
-		if relations.available_war(offer[3], offer[4]) then
-			relations.register_war(offer[3], offer[4])
-			if lume.match(game_data.lands[offer[4]].bonuses, function(x) return x[1] == "consequence" end) then
-				game_data.consequence_data[offer[3]] = game_values.consequence_time
-			end
-		end
+		offers.register("war", offer[4], offer[5])
 	end
 end
 

@@ -4,8 +4,6 @@ local M = {}
 -- chat_function(message_text, just_for_host, client)
 -- kick_function(client, reason)
 
-local server_settings = require "server_settings"
-
 local plugins_list = {
 	system = {
 		data = require "core.server.plugins.system",
@@ -19,18 +17,18 @@ local plugins_list = {
 		data = require "core.server.plugins.chat",
 		order = 5
 	},
-	--afk = {
-	--	data = require "core.server.plugins.afk",
-	--	order = 6
-	--},
+	afk = {
+		data = require "core.server.plugins.afk",
+		order = 6
+	},
 	--verifier = {
 		--data = require "core.server.plugins.verifier",
 		--order = 6
 	--},
-	essentials = {
+	--essentials = {
 	 	--data = require "core.server.plugins.essentials",
-	 	order = 6
-	 },
+	 --	order = 6
+	 --},
 	--game_switch = {
 		--data = require "core.server.plugins.game_switch",
 		--order = 6
@@ -143,7 +141,7 @@ function M.init(plugins_api)
 		send_data = plugins_api._send,
 		set_server_state = plugins_api._set_server_state,
 		start = plugins_api._start,
-		next_turn = plugins_api._next,
+		next_turn = plugins_api._next
 	}
 
     if not plugins_data.HOST_IS_PLAYER then
@@ -251,7 +249,7 @@ function M.parse_command(cmd, client)
 		if k == cmd[1] then
 			if not client or plugins_function.check_command_permission(client, cmd[1]) then
                 local client_data = get_data("clients_data")[client]
-                log("players", "Player "..client_data.name.." use command: "..cmd[1].." "..(cmd[2] or "").." "..(cmd[3] or ""))
+                -- log("players", "Player "..client_data.name.." use command: "..cmd[1].." "..(cmd[2] or "").." "..(cmd[3] or ""))
 				commands_list[k](client, cmd)
 			else
 				plugins_function.chat_message("You do not have permission to do this", "error", true, client)
@@ -270,11 +268,6 @@ function M.commands_list(client)
 		table.insert(cmd_list, k)
 	end
 	return cmd_list
-end
-
-function M.commands_info()
-	local t = deepcopy(server_settings.plugin)
-	return t.commands_info
 end
 
 return M

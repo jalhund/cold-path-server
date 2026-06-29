@@ -17,7 +17,8 @@ function t.recruit(land, province, amount)
 	if not game_data.lands[land] or not game_data.provinces[province] then
 		return false
 	end
-	return not is_water(province) and game_data.provinces[province].p - amount >= game_values.min_population
+	return game_data.lands[land].ideology ~= "technocracy"
+			and not is_water(province) and game_data.provinces[province].p - amount >= game_values.min_population
 			and game_data.lands[land].money > 0
 end
 
@@ -57,6 +58,13 @@ function t.tank(land, from, to)
 	return game_data.lands[land].resources.tank > 0 and game_data.provinces[from].o == land
 end
 
+function t.drone(land, from, to)
+	if not game_data.lands[land] or not game_data.provinces[from] or not game_data.provinces[to] then
+		return false
+	end
+	return (game_data.lands[land].resources.drone or 0) > 0 and game_data.provinces[from].o == land
+end
+
 function t.open_skill(land, skill)
 	if not game_data.lands[land] or not skills_data[skill] then
 		return false
@@ -83,7 +91,7 @@ function t.set_ideology(land, ideology)
 		return false
 	end
 	local t = {
-		"republic", "trade_republic", "democracy", "monarchy", "theocracy", "communism", "fascism", "anarchism"
+		"republic", "trade_republic", "democracy", "monarchy", "theocracy", "communism", "fascism", "anarchism", "technocracy", "military_junta"
 	}
 	return find_in_table(ideology, t) and ideology ~= game_data.lands[land].ideology and
 			game_data.step - game_data.lands[land].changed_ideology >= game_values.ideology_cooldown
@@ -91,6 +99,10 @@ end
 
 function t.build(land, province, building_id)
 	if not game_data.lands[land] or not game_data.provinces[province] or not get_building_data(building_id) then
+		return false
+	end
+	if (building_id == "robot_factory" or building_id == "drone_factory")
+			and game_data.lands[land].ideology ~= "technocracy" then
 		return false
 	end
 	return not is_water(province) and game_data.provinces[province].o == land and

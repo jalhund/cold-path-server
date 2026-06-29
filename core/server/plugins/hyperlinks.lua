@@ -8,7 +8,7 @@ local api
 -- List of hyperlinks. Format
 -- <unique string>: <link>
 local list = {
-    discord = "https://discord.gg/CrCXVkV",
+    discord = "https://discord.gg/jfCZVRn2GR",
     vk = "https://vk.com/coldpathgame",
     guides_en = "https://book.denismakhortov.com/",
     guides_ru = "https://book.denismakhortov.com/v/ru/",
@@ -26,7 +26,7 @@ local function send_message()
 end
 
 function M.init(_api)
-    api = _api
+	api = _api
 end
 
 local is_first = true
@@ -37,7 +37,7 @@ function M.on_player_joined(client)
         timer_module.every(600, send_message)
         is_first = false
     end
-    local t = {
+	local t = {
         type = "hyperlinks",
         data = {
             list = list

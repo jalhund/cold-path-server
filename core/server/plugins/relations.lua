@@ -33,7 +33,7 @@ end
 
 local function register_peace(client, args)
     if not admin_selection[client] then
-        api.call_function("chat_message", "Choose provinces using /p1 and /p2", "error", true, client)
+        api.call_function("chat_message", "Choose provinces using /prov1 and /prov2", "error", true, client)
         return
     end
     local province_1 = admin_selection[client].prov1
@@ -58,7 +58,7 @@ end
 
 local function nopact(client, args)
     if not admin_selection[client] then
-        api.call_function("chat_message", "Choose provinces using /p1 and /p2", "error", true, client)
+        api.call_function("chat_message", "Choose provinces using /prov1 and /prov2", "error", true, client)
         return
     end
     local province_1 = admin_selection[client].prov1
@@ -90,7 +90,7 @@ end
 
 local function owner(client, args)
     if not admin_selection[client] then
-        api.call_function("chat_message", "Choose provinces using /p1 and /p2", "error", true, client)
+        api.call_function("chat_message", "Choose provinces using /prov1 and /prov2", "error", true, client)
         return
     end
     local province_1 = admin_selection[client].prov1
@@ -119,23 +119,23 @@ end
 
 
 local function reciv(client, args)
-    local cl = api.call_function("get_client_by_name", args[2])
-    if cl then
-        local client_uuid = api.get_data("clients_data")[client] and api.get_data("clients_data")[client].uuid
-        local cl_uuid = api.get_data("clients_data")[cl].uuid
+	local cl = api.call_function("get_client_by_name", args[2])
+	if cl then
+		local client_uuid = api.get_data("clients_data")[client] and api.get_data("clients_data")[client].uuid
+		local cl_uuid = api.get_data("clients_data")[cl].uuid
 
-        local province = tracked_provinces[client]
+		local province = tracked_provinces[client]
 
-        if province and game_data.provinces[province] then
-            local t = api.get_data("preferred_civs")
-            t[cl_uuid] = game_data.provinces[province].o
-            api.call_function("chat_message", "Done!", "system", true, client)
-        else
-            api.call_function("chat_message", "Wrong province. Try to use /track to find error", "error", true, client)
-        end
-    else
-        api.call_function("chat_message", "Wrong name", "error", true, client)
-    end
+		if province and game_data.provinces[province] then
+			local t = api.get_data("preferred_civs")
+			t[cl_uuid] = game_data.provinces[province].o
+			api.call_function("chat_message", "Done!", "system", true, client)
+		else
+			api.call_function("chat_message", "Wrong province. Try to use /track to find error", "error", true, client)
+		end
+	else
+		api.call_function("chat_message", "Wrong name", "error", true, client)
+	end
 end
 
 function M.init(_api)
@@ -146,16 +146,16 @@ function M.init(_api)
     enabled_tracking = {}
 
     api.register_command("/track", track)
-    api.register_command("/p1", set_prov1)
-    api.register_command("/p2", set_prov2)
+    api.register_command("/prov1", set_prov1)
+    api.register_command("/prov2", set_prov2)
     api.register_command("/peace", register_peace)
     api.register_command("/nopact", nopact)
-    api.register_command("/ow", owner)
+    api.register_command("/owner", owner)
     api.register_command("/reciv", reciv)
 end
 
 function M.on_player_joined(client)
-    local t = {
+	local t = {
         type = "enable_selected_province_tracking",
         data = {}
     }
@@ -164,7 +164,7 @@ end
 
 function M.on_data(data, ip, port, client)
     -- Detailed info for admins
-    if data.type == "tracked_province" then
+	if data.type == "tracked_province" then
         if enabled_tracking[client] then
             local text = "Selected province: "..data.data.province
             if not admin_selection[client] then
@@ -173,10 +173,10 @@ function M.on_data(data, ip, port, client)
             local prov1 = admin_selection[client].prov1
             local prov2 = admin_selection[client].prov2
             if admin_selection[client].prov1 then
-                text = text.."  /p1: "..prov1.." | "..(game_data.provinces[prov1].o or "water")
+                text = text.."  /prov1: "..prov1.." | "..(game_data.provinces[prov1].o or "water")
             end
             if admin_selection[client].prov2 then
-                text = text.."  /p2: "..prov2.." | "..(game_data.provinces[prov2].o or "water")
+                text = text.."  /prov2: "..prov2.." | "..(game_data.provinces[prov2].o or "water")
             end
             local t = {
                 type = "server_text",

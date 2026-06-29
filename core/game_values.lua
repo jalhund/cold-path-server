@@ -96,8 +96,17 @@ local t = {
 		
 		anarchism_attack_bonus = 1.07,
 		anarchism_war_weariness_mod = 2,
-		anarchism_inflation_mod = 5
+		anarchism_inflation_mod = 5,
+
+		technocracy_science_increase_bonus = 1.5,
+
+		military_junta_attack_bonus = 1.25,
+		military_junta_defense_bonus = 1.25,
+		military_junta_gold_per_turn_bonus = 0.7,
 	},
+
+	robots_per_turn = 1000,
+	drone_damage = 5000,
 
 	espionage = {
 		-- Flat intelligence income from the agency (also baked into buildings_data output).

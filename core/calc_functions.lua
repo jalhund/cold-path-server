@@ -109,6 +109,8 @@ local function calc_move()
 			army_functions.air_attack(v[1], v[3], v[4])
 		elseif v[2] == "tank" then
 			army_functions.tank(v[1], v[3], v[4])
+		elseif v[2] == "drone" then
+			army_functions.drone(v[1], v[3], v[4])
 		elseif v[2] == "chemical" then
 			army_functions.chemical(v[1], v[3], v[4])
 		elseif v[2] == "nuclear" then
@@ -600,6 +602,23 @@ local function calc_technology()
 end
 
 
+local function calc_intelligence_reset()
+	for k, v in pairs(game_data.lands) do
+		v.intelligence = v.intelligence or 0
+		v.intelligence_per_turn = {
+			buildings = 0
+		}
+		v.total_intelligence_per_turn = 0
+	end
+end
+
+local function calc_intelligence_apply()
+	for k, v in pairs(game_data.lands) do
+		v.total_intelligence_per_turn = v.intelligence_per_turn.buildings
+		v.intelligence = v.intelligence + v.total_intelligence_per_turn
+	end
+end
+
 local function calc_skills()
 	for k, v in pairs(game_data.lands) do
 		if game_data.step < game_values.max_skills / game_values.skills_per_turn then
@@ -664,23 +683,6 @@ local function calc_pacts()
 			remove_from_table(game_data.pacts_data[i][2], game_data.lands[game_data.pacts_data[i][1]].pacts)
 			table.remove(game_data.pacts_data, i)
 		end
-	end
-end
-
-local function calc_intelligence_reset()
-	for k, v in pairs(game_data.lands) do
-		v.intelligence = v.intelligence or 0
-		v.intelligence_per_turn = {
-			buildings = 0
-		}
-		v.total_intelligence_per_turn = 0
-	end
-end
-
-local function calc_intelligence_apply()
-	for k, v in pairs(game_data.lands) do
-		v.total_intelligence_per_turn = v.intelligence_per_turn.buildings
-		v.intelligence = v.intelligence + v.total_intelligence_per_turn
 	end
 end
 

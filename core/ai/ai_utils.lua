@@ -530,4 +530,26 @@ function M.parse_trade(offer)
 	return player_cost >= land_cost, player_cost, land_cost
 end
 
+-- Heuristic to accept an ally's call to war
+function M.accept_war_invitation(land, from, enemy)
+	-- Only allies should be able to call us
+	if not relations.check_alliance(land, from) then
+		return false
+	end
+	-- Don't accept if we cannot realistically reach/attack the enemy
+	if not M.available_for_attack(land, enemy) then
+		return false
+	end
+	-- Prefer joining if the caller is strong or enemy is weak relative to us
+	local our = get_land_points(land)
+	local ally = get_land_points(from)
+	local foe = get_land_points(enemy)
+	if ally >= our * 0.8 then return true end
+	if foe <= our * 1.2 then return true end
+	-- Or if we already share common enemies with the caller
+	if M.common_enemy(land, from) then return true end
+	-- Occasionally accept to keep alliances meaningful
+	return lume.random() < 0.15
+end
+
 return M

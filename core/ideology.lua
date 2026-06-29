@@ -6,6 +6,8 @@ function M.gold_per_turn_bonus(land)
         return game_values.ideology.trade_republic_gold_per_turn_bonus
     elseif i == "communism" then
         return game_values.ideology.communism_gold_per_turn_bonus
+    elseif i == "military_junta" then
+        return game_values.ideology.military_junta_gold_per_turn_bonus
     end
     return 1
 end
@@ -34,6 +36,8 @@ function M.science_per_turn_bonus(land)
         return game_values.ideology.monarchy_science_increase_bonus
     elseif i == "theocracy" then
         return game_values.ideology.theocracy_science_increase_bonus
+    elseif i == "technocracy" then
+        return game_values.ideology.technocracy_science_increase_bonus
     end
     return 1
 end
@@ -85,8 +89,10 @@ function M.army_attack_bonus(land, to_land)
         end
     elseif i == "anarchism" and to_land and get_num_of_provinces(to_land) > get_num_of_provinces(land) then
         local k = math.floor(get_num_of_provinces(to_land)/10)
-        
+
         return math.pow(game_values.ideology.anarchism_attack_bonus, k)
+    elseif i == "military_junta" then
+        return game_values.ideology.military_junta_attack_bonus
     end
     return 1
 end
@@ -103,6 +109,8 @@ function M.army_defense_bonus(land)
         if b then
             return game_values.ideology.monarchy_defense_bonus_if_enemy_has_more_army
         end
+    elseif i == "military_junta" then
+        return game_values.ideology.military_junta_defense_bonus
     end
     return 1
 end

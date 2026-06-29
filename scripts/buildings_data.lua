@@ -350,6 +350,31 @@ local t = {
 				},
 			},
 		},
+		{
+			id = "robot_factory",
+			lvl = {
+				[1] = {
+					input = {
+						["gold"] = 4000
+					},
+					cost = 40000,
+				},
+			},
+		},
+		{
+			id = "drone_factory",
+			lvl = {
+				[1] = {
+					input = {
+						["gold"] = 6000
+					},
+					output = {
+						["resource:drone"] = 1,
+					},
+					cost = 45000,
+				},
+			},
+		},
 	},
 	espionage = {
 		{

@@ -73,8 +73,99 @@ local function gold_provinces(land)
     return t
 end
 
+local function land_has_building(land, building)
+    for k, v in pairs(game_data.provinces) do
+        if not v.water and v.o == land and v.b[building] then
+            return true
+        end
+    end
+    return false
+end
+
+local function build_technocracy_robot_factory_if_needed(land)
+    if game_data.lands[land].ideology ~= "technocracy" then
+        return false
+    end
+
+    local at_war = lume.count(game_data.lands[land].enemies, function(x) return x ~= "Undeveloped_land" end) > 0
+    if not at_war and land_has_building(land, "robot_factory") then
+        return false
+    end
+
+    local cost = get_building_cost(land, "robot_factory")
+    if game_data.lands[land].money < cost then
+        return false
+    end
+
+    local provinces = safe_provinces(land)
+    if #provinces == 0 then
+        provinces = neutral_provinces(land)
+    end
+
+    for k, province in pairs(provinces) do
+        if available_building(land, province, "robot_factory") then
+            core.build(land, province, "robot_factory")
+            return true
+        end
+    end
+
+    return false
+end
+
+
+-- Optimized building strategy based on actual needs
+local function should_prioritize_economy(land)
+    -- Prioritize economy if we're struggling financially
+    if not game_data.lands[land] or not game_data.lands[land].economy then
+        return false
+    end
+    
+    local income = game_data.lands[land].economy.balance
+    local army_cost = game_data.lands[land].army * game_values.army_cost
+    
+    -- If army maintenance is eating > 60% of income
+    if income > 0 and army_cost > income * 0.6 then
+        return true
+    end
+    
+    -- If we're in debt
+    if game_data.lands[land].money < 0 then
+        return true
+    end
+    
+    return false
+end
+
+local function should_prioritize_science(land)
+    -- Check if we're falling behind in technology
+    if not game_data.lands[land] or not game_data.lands[land].technology then
+        return false
+    end
+    
+    local our_tech_count = 0
+    for k, v in pairs(game_data.lands[land].technology) do
+        if v then our_tech_count = our_tech_count + 1 end
+    end
+    
+    -- Compare to average
+    local total_tech = 0
+    local land_count = 0
+    for k, v in pairs(game_data.lands) do
+        if k ~= "Undeveloped_land" and not v.defeated and v.technology then
+            for key, val in pairs(v.technology) do
+                if val then total_tech = total_tech + 1 end
+            end
+            land_count = land_count + 1
+        end
+    end
+    
+    local avg_tech = land_count > 0 and (total_tech / land_count) or 0
+    return our_tech_count < avg_tech * 0.8  -- Behind by 20%
+end
 
 function M.build(land, budget)
+    build_technocracy_robot_factory_if_needed(land)
+
     local buildings = {
         economy = {
             priority = {},
@@ -100,25 +191,50 @@ function M.build(land, budget)
         if v.id == "mint" then
             if game_data.lands[land].resources.gold == 0 then
                 buildings.economy.priority[v.id] = 0
+            else
+                -- Prioritize mint if we have gold
+                buildings.economy.priority[v.id] = 3
             end
         elseif v.id == "mine" then
             buildings.economy.location[v.id] = "gold"
+            -- Mines are high priority on gold/uranium
+            buildings.economy.priority[v.id] = 2
+        end
+        
+        -- Boost economy priority if struggling
+        if should_prioritize_economy(land) then
+            buildings.economy.priority[v.id] = (buildings.economy.priority[v.id] or 1) * 2
         end
     end
 
     for k, v in pairs(buildings_data.science) do
         buildings.science.priority[v.id] = 1
         buildings.science.location[v.id] = "safe"
+        
+        -- Boost science if falling behind
+        if should_prioritize_science(land) then
+            buildings.science.priority[v.id] = 3
+        end
     end
 
     for k, v in pairs(buildings_data.defense) do
         buildings.defense.priority[v.id] = 1
         buildings.defense.location[v.id] = "safe"
-        if v.id == "tower" or v.id == "fortress" or v.id == "bridgehead" or v.id == "hospital" then
+        if v.id == "robot_factory" or v.id == "drone_factory" then
+            -- Only Technocracy can build these; for it the robot factory is the main army source.
+            if game_data.lands[land].ideology == "technocracy" then
+                buildings.defense.priority[v.id] = (v.id == "robot_factory") and 5 or 2
+                buildings.defense.location[v.id] = (v.id == "robot_factory") and "safe" or "danger"
+            else
+                buildings.defense.priority[v.id] = 0
+            end
+        elseif v.id == "tower" or v.id == "fortress" or v.id == "bridgehead" or v.id == "hospital" then
             buildings.defense.priority[v.id] = 2
             buildings.defense.location[v.id] = "danger"
         elseif v.id == "beacon" then
-            buildings.defense.priority[v.id] = 2
+            -- Only build beacons if we have coast
+            local has_coast = #coast_provinces(land) > 0
+            buildings.defense.priority[v.id] = has_coast and 2 or 0
             buildings.defense.location[v.id] = "coast"
         elseif v.id == "air_defense" then
             buildings.defense.priority[v.id] = 2
@@ -130,11 +246,18 @@ function M.build(land, budget)
         buildings.other.priority[v.id] = 1
         buildings.other.location[v.id] = "safe"
         if v.id == "port" then
-            buildings.other.priority[v.id] = 1
+            -- Only build ports if we have coast
+            local has_coast = #coast_provinces(land) > 0
+            buildings.other.priority[v.id] = has_coast and 1 or 0
             buildings.other.location[v.id] = "coast"
         elseif v.id == "nuclear_reactor" then
             if game_data.lands[land].resources.heavy_water == 0 then
                 buildings.other.priority[v.id] = 0
+            end
+        elseif v.id == "aerodrome" then
+            -- Prioritize aerodromes if we have enemies
+            if #game_data.lands[land].enemies > 1 then
+                buildings.other.priority[v.id] = 2
             end
         end
     end

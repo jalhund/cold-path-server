@@ -6,6 +6,11 @@ local buildings_functions = {
 			game_data.lands[province_data.o].resources.tank = game_data.lands[province_data.o].resources.tank + 1
 		end
 	end,
+	robot_factory = function(province_id, province_data, building_data)
+		-- Owner is guaranteed to be Technocracy here (see guard in calc_building).
+		-- Adds normal army to the province in the background, replacing recruitment.
+		province_data.a[province_data.o] = (province_data.a[province_data.o] or 0) + game_values.robots_per_turn
+	end,
 	nuclear_reactor = function(province_id, province_data, building_data)
 		local heavy_water = game_data.lands[province_data.o].resources.heavy_water
 		if heavy_water > game_values.max_heavy_water_in_reactor then
@@ -48,6 +53,13 @@ local buildings_functions = {
 
 local function calc_building(province_id, province_data, building_data, n, building_type)
 	-- pprint("calc specific building: ", building_data)
+	-- Robot/drone factories only function while the province owner is Technocracy.
+	-- (e.g. if a technocracy province with such a factory is conquered, it stops working)
+	if building_type == "robot_factory" or building_type == "drone_factory" then
+		if game_data.lands[province_data.o].ideology ~= "technocracy" then
+			return
+		end
+	end
 	local input_done = true
 	local input_factor = 1
 	if building_data.input then
@@ -98,7 +110,7 @@ local function calc_building(province_id, province_data, building_data, n, build
 					game_data.lands[province_data.o].economy.income.buildings + res
 				elseif k == "science" then
 					local science_per_turn = v * math.pow(game_values.science_building_factor, n - 1)
-		
+
 					game_data.lands[province_data.o].science_per_turn.buildings = game_data.lands[province_data.o].science_per_turn.buildings +
 						science_per_turn
 				elseif k == "intelligence" then
@@ -145,6 +157,8 @@ function M.calc_buildings()
 	calc_type_buildings("air_defense")
 	calc_type_buildings("chemical_factory")
 	calc_type_buildings("tank_factory")
+	calc_type_buildings("robot_factory")
+	calc_type_buildings("drone_factory")
 	calc_type_buildings("heavy_water_plant")
 	calc_type_buildings("nuclear_reactor")
 	calc_type_buildings("fusion_reactor")

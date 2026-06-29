@@ -5,12 +5,31 @@ local json = require "scripts.utils.json"
 local MAGIC = "CPMP"
 local VERSION = 1
 local PACKAGE_KIND = "cold_path_map"
+local package_cache = {}
 
 local function normalize_path(path)
 	if not path then
 		return nil
 	end
-	return string.gsub(path, "\\", "/")
+	local normalized = string.gsub(path, "\\", "/")
+	return normalized
+end
+
+local function strip_trailing_slash(path)
+	local normalized = normalize_path(path) or ""
+	if normalized == "" or normalized == "/" then
+		return normalized
+	end
+	local stripped = string.gsub(normalized, "/+$", "")
+	return stripped
+end
+
+local function ensure_trailing_slash(path)
+	local normalized = strip_trailing_slash(path)
+	if normalized == "" then
+		return ""
+	end
+	return normalized .. "/"
 end
 
 local function safe_open_file(path, mode)
@@ -32,12 +51,45 @@ end
 local function read_file(path, mode)
 	local file = safe_open_file(path, mode or "rb")
 	if not file then
+		if sys and sys.load_resource and (mode == nil or mode == "rb" or mode == "r") then
+			local resource_path = normalize_path(path) or ""
+			if resource_path:sub(1, 1) ~= "/" then
+				resource_path = "/" .. resource_path
+			end
+			local ok, data = pcall(sys.load_resource, resource_path)
+			if ok and data then
+				return data
+			end
+		end
 		return nil, "Error open file: " .. tostring(path)
 	end
 
 	local data = file:read("*a")
 	file:close()
 	return data
+end
+
+local function get_file_signature(path)
+	if not lfs or not lfs.attributes then
+		return nil
+	end
+	local normalized = normalize_path(path)
+	local attributes = normalized and lfs.attributes(normalized) or nil
+	if not attributes then
+		return nil
+	end
+	return tostring(attributes.size or "") .. ":" .. tostring(attributes.modification or "")
+end
+
+local function write_file(path, data)
+	local file = safe_open_file(path, "wb")
+	if not file then
+		return nil, "Error write file: " .. tostring(path)
+	end
+
+	file:write(data)
+	file:close()
+	return true
 end
 
 local function decode_u32(data, offset)
@@ -114,7 +166,15 @@ function M.read_package_bytes(data)
 end
 
 function M.read_package(path)
-	local data, err = read_file(path, "rb")
+	local normalized_path = normalize_path(path) or path
+	local signature = get_file_signature(normalized_path)
+	local cacheable = signature ~= nil
+	local cached = package_cache[normalized_path]
+	if cacheable and cached and cached.signature == signature then
+		return cached.package_data
+	end
+
+	local data, err = read_file(normalized_path, "rb")
 	if not data then
 		return nil, err
 	end
@@ -124,7 +184,13 @@ function M.read_package(path)
 		return nil, package_err
 	end
 
-	package_data.path = path
+	package_data.path = normalized_path
+	if cacheable then
+		package_cache[normalized_path] = {
+			signature = signature,
+			package_data = package_data
+		}
+	end
 	return package_data
 end
 
@@ -185,8 +251,78 @@ function M.file_exists(path, mode)
 	return true
 end
 
+function M.ensure_directory(path)
+	local normalized = strip_trailing_slash(path)
+	if normalized == "" then
+		return true
+	end
+
+	local attributes = lfs.attributes(normalized)
+	if attributes and attributes.mode == "directory" then
+		return true
+	end
+
+	local parent = normalized:match("^(.*)/[^/]+$")
+	if parent and parent ~= normalized then
+		local ok, err = M.ensure_directory(parent)
+		if not ok then
+			return nil, err
+		end
+	end
+
+	local ok, err = lfs.mkdir(normalized)
+	if ok or lfs.attributes(normalized, "mode") == "directory" then
+		return true
+	end
+
+	return nil, err or ("Error create directory: " .. tostring(normalized))
+end
+
+function M.find_map_package_path(root_path)
+	local root = ensure_trailing_slash(root_path or "")
+	local scan_root = root ~= "" and strip_trailing_slash(root) or "."
+	local files = {}
+
+	local attributes = lfs.attributes(scan_root)
+	if not attributes or attributes.mode ~= "directory" then
+		return nil
+	end
+
+	for entry in lfs.dir(scan_root) do
+		if entry ~= "." and entry ~= ".." and entry:match("%.map$") then
+			files[#files + 1] = entry
+		end
+	end
+
+	if #files == 0 then
+		return nil
+	end
+
+	table.sort(files, function(a, b)
+		local a_name = a:lower()
+		local b_name = b:lower()
+		if a_name == "exported_map.map" then
+			return true
+		end
+		if b_name == "exported_map.map" then
+			return false
+		end
+		return a_name < b_name
+	end)
+
+	return root .. files[1]
+end
+
+function M.write_package_bytes(path, bytes)
+	return write_file(path, bytes)
+end
+
 function M.normalize_path(path)
 	return normalize_path(path)
+end
+
+function M.ensure_trailing_slash(path)
+	return ensure_trailing_slash(path)
 end
 
 return M

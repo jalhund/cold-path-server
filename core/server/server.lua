@@ -17,6 +17,7 @@ local timer_module = require "core.timer"
 local timer_instance
 
 local server_settings = require "server_settings"
+local custom_map_storage = require "scripts.custom_map_storage"
 local map_package = require "scripts.map_package"
 
 local HOST_IS_PLAYER = false
@@ -26,10 +27,7 @@ local host_is_ready = false
 local tcp_server_require = require "defnet.tcp_server"
 local tcp_server = nil
 
-local afk = require "core.server.plugins.afk"
 local plugin = require "core.server.plugins.plugins_manager"
-
-local afk_sec = 15
 
 local clients_data = {}
 local clients_ready = {}
@@ -48,6 +46,7 @@ local function get_server_info()
 		t.data.players = t.data.players + 1
 	end
 	t.data.size = lume.count(game_data.lands, function(x) return not x.defeated and x.name ~= "undeveloped_land" end)
+	t.data.icon_url = server_settings.server_info.data.icon_url or ""
 	return t
 end
 
@@ -95,45 +94,14 @@ local function find_free_land(uuid)
 	end
 end
 
-local function kick(client, kick_reason)
-	if kick_reason then
-		local kick_info = {
-			type = "kick",
-			data = {
-				reason = kick_reason
-			}
-		}
-		tcp_server.urgent_send(to_json(kick_info), client)
-	end
-	log("Kick client: ", client, " by reason: ", kick_reason)
-	tcp_server.remove_client(client)
-end
-
-local function check_client(current_client, client_data)
-	local last_sync = afk.get_last_sync()
-
-	for client, data in pairs(clients_data) do
-		if client ~= current_client and (data.name == client_data.name or data.uuid == client_data.uuid) then
-			local last_ping = last_sync[client] and last_sync[client].last_time or 0
-			if socket.gettime() - last_ping > afk_sec then
-				kick(client, "Duplicate player, kicked to allow real player")
-				return true
-			else
-				return false
-			end
-		end
-	end
-	return true
-end
-
 local function check_name(name)
 	if name == "" then
 		return false
 	end
-	if name:match("%W") then
-		return false
-	end
-      
+    if name:match("%W") then
+        return false
+    end
+
 	if HOST_IS_PLAYER and name == settings.name then
 		return false
 	end
@@ -166,6 +134,20 @@ local function check_version(version)
 		return true
 	end
 	return false
+end
+
+local function kick(client, kick_reason)
+	if kick_reason then
+		local kick_info = {
+			type = "kick",
+			data = {
+				reason = kick_reason
+			}
+		}
+		tcp_server.urgent_send(to_json(kick_info), client)
+	end
+	log("Kick client: ", client, " by reason: ", kick_reason)
+	tcp_server.remove_client(client)
 end
 
 --local stat = require "scripts.sarah.statistics"
@@ -265,36 +247,51 @@ local function send_game_data(client, draw)
 end
 
 local function get_custom_map_package_path()
-    if HOST_IS_PLAYER then
-        return (debug_game_mode_file_path or "").."exported_map.map"
-    end
-    return "maps/"..tostring(game_data.map)..".map"
+	if type(custom_map_path) == "string" and map_package.is_package_path(custom_map_path) then
+		return custom_map_path
+	end
+	if HOST_IS_PLAYER then
+		return custom_map_storage.find_exported_map_path() or custom_map_storage.get_default_exported_map_path()
+	end
+	if type(game_data.map_name) == "string" and game_data.map_name ~= "" then
+		local by_name = "maps/" .. game_data.map_name .. ".map"
+		if map_package.file_exists(by_name, "rb") then
+			return by_name
+		end
+	end
+	if type(game_data.map) == "string" and game_data.map ~= "" then
+		local by_id = "maps/" .. game_data.map .. ".map"
+		if map_package.file_exists(by_id, "rb") then
+			return by_id
+		end
+		return by_id
+	end
 end
 
 local prepared_map_files
 local custom_map_hash
 
 local function prepare_map_files()
-    local package_path = get_custom_map_package_path()
-    if not package_path then
-        print("file error: custom map package path not found")
-        return
-    end
+	local package_path = get_custom_map_package_path()
+	if not package_path then
+		print("file error: custom map package path not found")
+		return
+	end
 
-    local package_data, err = map_package.read_package(package_path)
-    if not package_data then
-        print("file error:", package_path, err)
-        return
-    end
+	local package_data, err = map_package.read_package(package_path)
+	if not package_data then
+		print("file error:", package_path, err)
+		return
+	end
 
-    local d = lualzw.compress(package_data.bytes)
-    print("map package size:", #package_data.bytes)
-    print("compressed", #d)
+	local d = lualzw.compress(package_data.bytes)
+	print("map package size:", #package_data.bytes)
+	print("compressed", #d)
 
-    local luaxxhash = require "luaxxhash"
-    custom_map_hash = luaxxhash(d)
-    prepared_map_files = base64.encode(d)
-    print("base64", #prepared_map_files)
+	local luaxxhash = require "luaxxhash"
+	custom_map_hash = luaxxhash(d)
+	prepared_map_files = base64.encode(d)
+	print("base64", #prepared_map_files)
 end
 
 local function send_map_data(client)
@@ -346,19 +343,12 @@ local function register_player(client, client_data, ip)
 	clients_data[client].custom_maps = client_data.custom_maps
 
 	local verification_result, info = plugin.verify_registration(client, client_data)
-
-	if not check_name then
-		local succes = check_client(client, client_data)
-
-		if not succes then
-			kick(client, "The name is incorrect or a player with that name is already in the game. Try logging in again after "..afk_sec.." seconds")
-		end
+	if not free_land then
+		kick(client, "No free places")
+	elseif not check_name then
+		kick(client, "The name is incorrect or a player with that name is already in the game")
 	elseif not check_uuid then
-		local succes = check_client(client, client_data)
-
-		if not succes then
-			kick(client, "The UUID is incorrect or a player with that UUID is already in the game. Try logging in again after "..afk_sec.." seconds")
-		end
+		kick(client, "The UUID is incorrect or a player with that UUID is already in the game")
 	elseif not check_version then
 		kick(client, "Your game version is too old or new. Server version: "..server_settings.SERVER_VERSION)
 	elseif not verification_result then
@@ -376,7 +366,6 @@ local function register_player(client, client_data, ip)
 			data = {
 				players_list = M.get_players_list(),
 				commands_list = plugin.commands_list(),
-				commands_info = plugin.commands_info(),
 				game_values = game_values,
 				buildings_data = buildings_data,
 				technology_data = technology_data,
@@ -384,15 +373,6 @@ local function register_player(client, client_data, ip)
 			}
 		}
         tcp_server.send(to_json(t),client)
-
-        if not free_land then
-			local t = {
-				type = "to_spectator_mode",
-			}
-
-			tcp_server.send(to_json(t), client)
-		end
-
 		log("Registered player: ", clients_data[client].uuid, " ", clients_data[client].name, " ", clients_data[client].civilization)
 		plugin.on_player_registered(client)
 		update_players_list()
@@ -560,7 +540,6 @@ local function on_data(data, ip, port, client)
 		elseif data.type == "introduce" then
 			register_player(client, data.data, ip)
 		end
-		
 		if clients_data[client] and clients_data[client].state and clients_data[client].state == "in_game" then
 			plugin.on_data(data, ip, port, client)
 			if data.type == "ready" then
@@ -669,6 +648,11 @@ local function on_data(data, ip, port, client)
 					return false
 				end
 				M.tank(data.data.land, data.data.from, data.data.to)
+			elseif data.type == "drone" then
+				if not ac.verify_action("drone", data.data.land, data.data.from, data.data.to) then
+					return false
+				end
+				M.drone(data.data.land, data.data.from, data.data.to)
 			elseif data.type == "nuclear_weapon" then
 				if not ac.verify_action("nuclear_weapon", data.data.land, data.data.province) then
 					return false
@@ -722,7 +706,7 @@ local function on_data(data, ip, port, client)
 	end)
 	if not ok then
 		log("error", "On data error: ", err)
-		kick(client, "An error occurred while processing your request. Please make sure the quality of the connection is good and the correct version of the game")
+		kick(client, "Server error: "..err)
 	end
 end
 
@@ -1109,6 +1093,13 @@ function M.tank(land, from, to)
 	end
 end
 
+function M.drone(land, from, to)
+	core.drone(land, from, to)
+	if HOST_IS_PLAYER and land == HOST_CIVILIZATION then
+		msg.post("game:/map_interface", "update_top_line")
+	end
+end
+
 function M.open_skill(land, skill)
 	core.open_skill(land, skill)
 	if HOST_IS_PLAYER and land == HOST_CIVILIZATION then
@@ -1124,16 +1115,16 @@ function M.set_tax(land, tax)
 	core.set_tax(land, tax)
 end
 
-function M.set_ideology(land, ideology)
-	core.set_ideology(land, ideology)
-end
-
 function M.set_counter_intelligence(land, value)
 	core.set_counter_intelligence(land, value)
 end
 
 function M.espionage(land, op, target_province, chosen_building)
 	return core.espionage(land, op, target_province, chosen_building)
+end
+
+function M.set_ideology(land, ideology)
+	core.set_ideology(land, ideology)
 end
 
 function M.build(land, province, building_id)
@@ -1218,16 +1209,72 @@ function M.accept_offer(land, offer_id)
 end
 
 function M.change_country(from, to, client)
-	if free_land(to) then
-		preferred_civs[clients_data[client].uuid] = to
-		kick(client, "Civilization changed!")
+	-- Проверяем, что страна существует и свободна 
+	-- (т.е. ни один игрок её не занимает)
+	local client_data = clients_data[client]
+	
+	-- Проверяем, что клиент зарегистрирован и находится в игре
+	if not client_data or client_data.state ~= "in_game" then
+		return
 	end
+	
+	-- Проверяем, что отправитель запроса - тот же игрок, который отправляет запрос
+	if client_data.civilization ~= from then
+		return
+	end
+	
+	-- Проверяем, что целевая страна существует
+	if not game_data.lands[to] then
+		return
+	end
+	
+	-- Проверяем, что целевая страна не занята другим игроком
+	local is_occupied = false
+	for k, v in pairs(clients_data) do
+		if v.civilization == to then
+			is_occupied = true
+			break
+		end
+	end
+	
+	if HOST_IS_PLAYER and HOST_CIVILIZATION == to then
+		is_occupied = true
+	end
+	
+	if is_occupied then
+		-- Страна уже занята, отправляем сообщение об ошибке
+		M.chat("Невозможно сменить страну: " .. land_lang(to) .. " уже занята другим игроком.", true, client)
+		return
+	end
+	
+	-- Меняем страну игрока
+	client_data.civilization = to
+	
+	-- Отправляем сообщение в чат всем игрокам
+	M.chat(client_data.name .. " сменил страну на " .. land_lang(to) .. ".")
+	
+	-- Обновляем список игроков
+	update_players_list()
+	
+	-- Отправляем игроку сообщение о необходимости перезагрузить интерфейс
+	local t = {
+		type = "civilization_changed",
+		data = {
+			new_civilization = to
+		}
+	}
+	tcp_server.send(to_json(t), client)
 end
 
 function M.change_country_name(land, name, client)
-	local client_land = clients_data[client].civilization
+	local client_data = clients_data[client]
 
-	if land ~= client_land then
+	-- Проверяем что клиент зарегистрирован и находится в игре
+	if client_data and client_data.state ~= "in_game" then
+		return
+	end
+
+	if client_data.civilization ~= land then
 		return
 	end
 
@@ -1235,13 +1282,29 @@ function M.change_country_name(land, name, client)
 		return
 	end
 
+	-- Изменяем название страны игрока
 	game_data.lands[land].name = name
+
+	update_players_list()
+
+	-- Отправляем игроку сообщение о необходимости перезагрузить интерфейс
+	local t = {
+		type = "civilization_name_changed",
+		data = {}
+	}
+
+	tcp_server.send(to_json(t), client)
 end
 
 function M.change_country_color(land, color, client)
-	local client_land = clients_data[client].civilization
+	local client_data = clients_data[client]
 
-	if land ~= client_land then
+	-- Проверяем что клиент зарегистрирован и находится в игре
+	if client_data and client_data.state ~= "in_game" then
+		return
+	end
+
+	if client_data.civilization ~= land then
 		return
 	end
 
@@ -1249,13 +1312,29 @@ function M.change_country_color(land, color, client)
 		return
 	end
 
+	-- Изменяем название страны игрока
 	game_data.lands[land].color = color
+
+	update_players_list()
+
+	-- Отправляем игроку сообщение о необходимости перезагрузить интерфейс
+	local t = {
+		type = "civilization_color_changed",
+		data = {}
+	}
+
+	tcp_server.send(to_json(t), client)
 end
 
 function M.change_country_banner(land, banner, client)
-	local client_land = clients_data[client].civilization
+	local client_data = clients_data[client]
 
-	if land ~= client_land then
+	-- Проверяем что клиент зарегистрирован и находится в игре
+	if client_data and client_data.state ~= "in_game" then
+		return
+	end
+
+	if client_data.civilization ~= land then
 		return
 	end
 
@@ -1263,7 +1342,18 @@ function M.change_country_banner(land, banner, client)
 		return
 	end
 
+	-- Изменяем флаг страны игрока
 	game_data.lands[land].banner = banner
+
+	update_players_list()
+
+	-- Отправляем игроку сообщение о необходимости перезагрузить интерфейс
+	local t = {
+		type = "civilization_banner_changed",
+		data = {}
+	}
+
+	tcp_server.send(to_json(t), client)
 end
 
 return M

@@ -194,8 +194,7 @@ function M.game_over(land, win)
 		end
 
 		print("Game data deepcopy")
-		original_game_data = scenarios[next_map][next_scenario]
-		game_data = deepcopy(original_game_data)
+		game_data = deepcopy(scenarios[next_map][next_scenario])
 		modify_game_data(game_data.id)
 		print("next map to nil")
 		next_map = nil
@@ -204,11 +203,7 @@ function M.game_over(land, win)
 		print("validate game data", game_data.id)
 		validate_scenario.validate(game_data)
 		print("load adjacency")
-		if game_data.custom_map then
-            load_adjacency(true, "maps/"..game_data.map..".map")
-        else
-            load_adjacency()
-        end
+		load_adjacency()
 
 		api.start(true)
 	end

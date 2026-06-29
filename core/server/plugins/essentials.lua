@@ -3,14 +3,13 @@ local M = {}
 
 local server_settings = require "server_settings"
 
-local inspect = require "scripts.utils.inspect"
 local flatdb = require 'scripts.utils.flatdb'
-local xor_lib = require "scripts.utils.xor"
 local db
 
 local api
 
 local admins_file_path = "admins.dat"
+local banned_file_path = "banned.dat"
 local banned_ip_file_path = "banned_ip.dat"
 
 local muted = {}
@@ -36,7 +35,7 @@ local function check_ban(uuid, ip, unique_id)
     clear_old_records(banned_ip_file_path)
 
     for key, value in pairs(db.banned) do
-        -- pprint(value, socket.gettime())
+        pprint(value, socket.gettime())
         if value.ban_time < socket.gettime() then
             db.banned[key] = nil
         elseif value.uuid == uuid or value.unique_id == unique_id then
@@ -77,12 +76,8 @@ local function ban(client, args)
             table.remove(args, 3)
         end
 
-        if t > 5 and api.get_data("clients_data")[client].permissions_group == "junior" then
-            api.call_function("chat_message", "You are Junior moderator, you can't ban more than 5 hours", "error", true, client)
-            return
-        end
-
         local ban_time = socket.gettime() + t * 60 * 60
+        api.call_function("chat_message", args[2] .. " banned by "..admin_name.." for " .. t .. " hours", "system")
 
         local ban_id = 1
         for i = 1, 99999999, 1 do
@@ -91,8 +86,6 @@ local function ban(client, args)
                 break
             end
         end
-
-        api.call_function("chat_message", args[2] .. " banned by "..admin_name.." for " .. t .. " hours. Ban ID: "..ban_id, "system")
 
         local reason = "Admin: "..admin_name..". Ban ID: "..ban_id..". "
         if args[3] then
@@ -113,55 +106,6 @@ local function ban(client, args)
         api.call_function("kick", cl, args)
     else
         api.call_function("chat_message", "Unknown name", "error", true, client)
-    end
-end
-
-local function banid(client, args)
-    local player_id = tonumber(args[2])
-    local t = tonumber(args[3])
-    local player_table, player_uuid = lume.match(db.players_data, function(x) return player_id and x.id == player_id end)
-    local admin_name = api.get_data("clients_data")[client].name
-    if player_uuid then
-        if not t then
-            t = 365 * 24 -- 1 year
-        else
-            table.remove(args, 3)
-        end
-
-        if t > 5 and api.get_data("clients_data")[client].permissions_group == "junior" then
-            api.call_function("chat_message", "You are Junior moderator, you can't ban more than 5 hours", "error", true, client)
-            return
-        end
-
-        local ban_time = socket.gettime() + t * 60 * 60
-
-        local ban_id = 1
-        for i = 1, 99999999, 1 do
-            if not db.banned[i] then
-                ban_id = i
-                break
-            end
-        end
-
-        api.call_function("chat_message", args[2] .. " banned by "..admin_name.." for " .. t .. " hours. Ban ID: "..ban_id, "system")
-
-        local reason = "Admin: "..admin_name..". Ban ID: "..ban_id..". "
-        if args[3] then
-            reason = reason..join(args, " ", 3)
-        end
-
-        local ban_table = {
-            uuid = player_uuid,
-            unique_id = player_table.unique_id,
-            ban_time = ban_time,
-            reason = reason,
-            name = ""
-        }
-
-        db.banned[ban_id] = ban_table
-        db:save()
-    else
-        api.call_function("chat_message", "Unknown player id", "error", true, client)
     end
 end
 
@@ -270,74 +214,17 @@ local function forcenext()
     api.next_turn()
 end
 
-local function get_info(client, args)
-    if args[2] then
-        local cl = api.call_function("get_client_by_name", args[2])
-        if not cl then
-            api.call_function("chat_message", "Unknown name", "error", true, client)
-            return
-        end
-        local cl_data = api.get_data("clients_data")[cl]
-        local text = inspect(db.players_data[cl_data.uuid] or {})
-        api.call_function("chat_message", "Info of player "..cl_data.name.." is: \n"..text, "system", true, client) 
-    else
-        local cl_data = api.get_data("clients_data")[client]
-        local text = inspect(db.players_data[cl_data.uuid] or {})
-        api.call_function("chat_message", "Your info is: \n"..text, "system", true, client) 
-    end
-end
-
-local function role(client, args)
-    local new_role = args[2]
-    local available_roles = {
-        "moder", "junior", "premium", "default"
-    }
-    if not new_role or not find_in_table(new_role, available_roles) then
-        api.call_function("chat_message", "Unknown role. Your role is: "..(new_role or "").."\n Available roles: moder, junior, premium, default", "error", true, client)
-        return
-    end
-    local cl = api.call_function("get_client_by_name", args[3])
-    if cl then
-        local cl_data = api.get_data("clients_data")[cl]
-        db.players_data[cl_data.uuid].role = new_role
-        db:save()
-        api.call_function("set_permissions_group", cl, new_role)
-        api.call_function("chat_message", "Player " .. cl_data.name .. " now is "..new_role, "system")
-    else
-        api.call_function("chat_message", "Unknown name", "error", true, client)
-    end
-end
-
-local function history(client, args)
-    local name = args[2]
-
-    if name and db.name_history[name] then
-        api.call_function("chat_message", "Name "..name.." history: " .. inspect(db.name_history[name]), "system", true, client)
-    else
-        api.call_function("chat_message", "Unknown name", "error", true, client)
-    end
-end
-
 function M.init(_api)
     api = _api
 
     db = flatdb('./db')
 
-    if not db.players_data then
-        db.players_data = {}
-    end
-
     if not db.banned then
         db.banned = {}
     end
 
-    if not db.name_history then
-        db.name_history = {}
-    end
-
     api.register_command("/shutdown", shutdown)
     api.register_command("/ban", ban)
-    api.register_command("/banid", banid)
     api.register_command("/unban", unban)
     api.register_command("/banip", banip)
     api.register_command("/setdifficulty", set_difficulty)
@@ -345,9 +232,6 @@ function M.init(_api)
     api.register_command("/unmute", unmute)
     api.register_command("/sudo", sudo)
     api.register_command("/forcenext", forcenext)
-    api.register_command("/info", get_info)
-    api.register_command("/role", role)
-    api.register_command("/history", history)
     game_data.difficulty = server_settings.plugin.difficulty or "standard"
 end
 
@@ -356,47 +240,11 @@ function M.verify_registration(client, client_data)
     if timestamp then
         return false, "You are banned until: " .. os.date("%c", timestamp) .. "\nReason: " .. reason
     end
-
-    if not client_data.elapsed_time then
-        return false, "Please restart game"
-    end
-
-    local elapsed_time = xor_lib(client_data.elapsed_time, client_data.uuid)
-
-    elapsed_time = tonumber(elapsed_time)
-
-    if elapsed_time < server_settings.minimum_played_time then
-        return false, "Sorry, you can't join this server. You have to play "..math.ceil(server_settings.minimum_played_time / 60)
-            .." minutes in singleplayer mode to join this server"
-    end
-
     return true
 end
 
 function M.on_player_registered(client)
     local cl_data = api.get_data("clients_data")[client]
-    if not db.players_data[cl_data.uuid] then
-        db.players_data[cl_data.uuid] =  {
-            id = count_elements_in_table(db.players_data) + 1,
-            unique_id = cl_data.unique_id
-        }
-    end
-    cl_data.id = db.players_data[cl_data.uuid].id
-    if db.players_data[cl_data.uuid].role then
-        api.call_function("set_permissions_group", client, db.players_data[cl_data.uuid].role)
-    end
-    if not db.name_history[cl_data.name] then
-        db.name_history[cl_data.name] = {
-        }
-    end
-    table.insert(db.name_history[cl_data.name], {
-        id =  db.players_data[cl_data.uuid].id,
-        time = os.date('%Y-%m-%d %H:%M:%S')
-    })
-    if #db.name_history[cl_data.name] > 3 then
-        table.remove(db.name_history[cl_data.name], 1)
-    end 
-    db:save()
     if check_admin(cl_data.uuid) then
         api.call_function("set_permissions_group", client, "admin")
     end

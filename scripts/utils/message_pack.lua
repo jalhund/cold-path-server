@@ -25,12 +25,12 @@ local pcall = pcall
 local setmetatable = setmetatable
 local tostring = tostring
 local type = type
-local char = require'string'.char
-local floor = require'math'.floor
-local frexp = require'math'.frexp
-local ldexp = require'math'.ldexp
-local huge = require'math'.huge
-local tconcat = require'table'.concat
+local char = string.char
+local floor = math.floor
+local frexp = math.frexp
+local ldexp = math.ldexp
+local huge = math.huge
+local tconcat = table.concat
 
 --[[ debug only
 local format = require'string'.format

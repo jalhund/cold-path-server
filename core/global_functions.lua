@@ -2,7 +2,7 @@ local M = {}
 
 adjacency_map = {}
 local json = require "scripts.utils.json"
-local map_package = require "scripts.map_package"
+local map_runtime_loader = require "scripts.map_runtime_loader"
 army_functions = require "core.army_functions"
 local relations = require "core.relations"
 
@@ -173,47 +173,16 @@ end
 
 function load_adjacency(debug_mode, custom_path)
 	adjacency_map = {}
-	local data = ""
-	local path
-	if game_data.map == "europe" then
-		path = "assets/adjacency_map_europe.dat"
-	elseif game_data.map == "america" then
-		path = "assets/adjacency_map_america.dat"
-	elseif game_data.map == "lp_16" then
-		path = "assets/adjacency_map_lp_16.dat"
-	elseif game_data.map == "pvp" then
-		path = "assets/adjacency_map_pvp.dat"
-	elseif game_data.map == "europeamerica" then
-		path = "assets/adjacency_map_europeamerica.dat"
-	elseif game_data.map == "europe_remastered" then
-		path = "assets/adjacency_map_europe_remastered.dat"
-	else
-	    if not network.is_console()  then
-            path = (debug_game_mode_file_path or "").."exported_map.map"
-        else
-            path = "maps/"..game_data.map..".map"
-        end
-	end
-
-	if debug_mode then
-		path = "adjacency_map.dat"
-		if custom_path then
-			path = custom_path
-		end
-	end
-    log("Load adjacency path is: ", path)
-	if map_package.is_package_path(path) then
-		local err
-		data, err = map_package.read_section_bytes(path, "adjacency")
-		if not data then
-			error("Error open adjacency: "..tostring(path).."#adjacency ("..tostring(err)..")")
-		end
-	elseif network.is_console() or debug_mode then
-		local file = io.open(path, "r")
-		data = file:read("*a")
-		file:close()
-	else
-		data = sys.load_resource("/"..path)
+	local data, err, path = map_runtime_loader.load_runtime_adjacency_text({
+		game_map = game_data.map,
+		debug_mode = debug_mode,
+		console_mode = network.is_console(),
+		custom_map_enabled = game_data.custom_map,
+		custom_path = custom_path
+	})
+	log("Load adjacency path is: ", path or "unknown")
+	if not data then
+		error("Error open adjacency: " .. tostring(err))
 	end
 	-- pprint("Adjacency. Loaded data: ", data)
 
@@ -372,26 +341,52 @@ function available_building(land, province, id)
 		lvl = "_"..n_lvl
 	end
 
+	-- Robot/drone factories are gated by ideology (Technocracy) instead of the technology tree
+	local is_technocracy_building = (id == "robot_factory" or id == "drone_factory")
+	if is_technocracy_building and game_data.lands[land].ideology ~= "technocracy" then
+		return false, lang("only_technocracy", "chat_messages")
+	end
+
+	-- Espionage buildings (DLC «Шпионаж») are gated by the espionage system and the
+	-- DLC purchase instead of the technology tree.
+	local is_espionage_building = (id == "intelligence_agency" or id == "intelligence_center")
+	if is_espionage_building then
+		if not game_data.espionage_enabled then
+			return false, lang("reason_espionage_disabled", "espionage")
+		end
+		if not (check_espionage_donate and check_espionage_donate()) then
+			return false, lang("reason_locked", "espionage")
+		end
+		if id == "intelligence_agency" then
+			-- Only one Intelligence Agency per country.
+			for k, v in pairs(game_data.provinces) do
+				if not v.water and v.o == land and v.b and v.b.intelligence_agency then
+					return false, lang("reason_agency_exists", "espionage")
+				end
+			end
+		end
+	end
+
 	if building_data.lvl[n_lvl] and building_data.lvl[n_lvl].resource_cost then
 		for k, v in pairs(building_data.lvl[n_lvl].resource_cost) do
 			if game_data.lands[land].resources[k] < v then
-				return false, "no_resources"
+				return false, lang("no_resources", "chat_messages")
 			end
 		end
 	end
 
 	if game_data.provinces[province].o ~= land then
-		return false, "you cannot build here"
+		return false, lang("cannot_build", "chat_messages")
 	elseif game_data.provinces[province].b[id] and
 		game_data.provinces[province].b[id] == #get_building_data(id).lvl then
-		return false, "maximum level"
+		return false, lang("maximum_level", "chat_messages")
 	elseif not game_data.provinces[province].b[id] and 
 	count_elements_in_table(game_data.provinces[province].b) >= province_buildings_limit(province) then
-		return false, "buildings limit"
+		return false, lang("buildings_limit", "chat_messages")
 	elseif game_data.lands[land].money < get_building_cost(land, id, game_data.provinces[province].b[id]) then
-		return false, "no_money"
-	elseif not lume.match(game_data.lands[land].bonuses, function(x) return x[1] == "building_"..id..lvl end) then
-		return false, "no_technology"
+		return false, lang("no_money", "chat_messages")
+	elseif not is_technocracy_building and not lume.match(game_data.lands[land].bonuses, function(x) return x[1] == "building_"..id..lvl end) then
+		return false, lang("no_technology", "chat_messages")
 	else
 		return true
 	end
@@ -551,7 +546,9 @@ end
 
 function missile_protected(land, province)
 	if not game_data.provinces[province].water and game_data.provinces[province].b.missile_defense then
-		return true, province
+		if math.random() < game_values.missile_defense_chance then
+			return true, province
+		end
 	end
 	return false
 end
@@ -955,6 +952,14 @@ function show_error(title, text)
 		text = text})
 end
 
+function show_message_list(title, data)
+	msg.post("message_manager:/message_manager", "show_message_list", { title = title, data = data })
+end
+
+function hide_message_list()
+	msg.post("message_manager:/message_manager", "hide_message_list")
+end
+
 function set_settings(field, value)
 	settings[field] = value
 	local settings_path = sys.get_save_file("Cold_Path", "settings")
@@ -992,7 +997,7 @@ function building_description(buildings_id, lvl)
 end
 
 function validate_text(text)
-	return string.find(text, "<") and string.find(text, ">") or string.find(text, "|") or not string.match(text, "%S")
+	return string.find(text, "<") and string.find(text, ">") or not string.match(text, "%S")
 end
 
 function translate_message(text)
