@@ -23,7 +23,7 @@ local t = {
 	SERVER_VERSION = 21,
 	-- Maximum amount of time per turn. Seconds
 	time_to_turn = 180,
-	verify_uuid = true,
+	verify_uuid = false,
     minimum_played_time = 5*60, -- time in seconds that player must play in singleplayer mode to join this multiplayer server
 	plugin = {
 		welcome = [[Welcome to Official Server #1!
