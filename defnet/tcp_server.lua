@@ -70,9 +70,6 @@ function M.create(port, on_data, on_client_connected, on_client_disconnected)
 					local client_ip, client_port = connection:getpeername()
 					on_client_disconnected(client_ip, client_port, connection)
 				end
-				pcall(function()
-					connection_to_remove:close()
-				end)
 				break
 			end
 		end
@@ -130,33 +127,14 @@ function M.create(port, on_data, on_client_connected, on_client_disconnected)
 		end
 	end
 
-	function server.pending_bytes(client)
-		local queue = queues[client]
-		if not queue then
-			return 0
-		end
-		return queue.pending_bytes()
-	end
-
-	function server.flush(client)
-		local queue = queues[client]
-		if not queue then
-			return false, "missing_queue"
-		end
-		return queue.send()
-	end
-
 	function server.urgent_send(data,client)
-		if not queues[client] then
-			return false
-		end
 		queues[client].add(data)
 		coroutine.wrap(function()
 			local ok, err = queues[client].send()
 			if ok then
 				print("Urgent send data: ", data)
 			else
-				print("Urgent send error: ", err)
+				print("Urgent send error: ", error)
 			end
 		end)()
 	end
@@ -168,16 +146,10 @@ function M.create(port, on_data, on_client_connected, on_client_disconnected)
 			return
 		end
 		
-		-- new connections?
-		while true do
-			local client, err = server_socket:accept()
-			if not client then
-				break
-			end
+		-- new connection?
+		local client, err = server_socket:accept()
+		if client then
 			client:settimeout(0)
-			pcall(function()
-				client:setoption("tcp-nodelay", true)
-			end)
 			table.insert(clients, client)
 			queues[client] = tcp_send_queue.create(client, M.TCP_SEND_CHUNK_SIZE)
 			if on_client_connected then
@@ -214,9 +186,7 @@ function M.create(port, on_data, on_client_connected, on_client_disconnected)
 		local read, write, err = socket.select(nil, clients, 0)
 		for _,client in ipairs(write) do
 			coroutine.wrap(function()
-				if queues[client] then
-					local ok, err = queues[client].send()
-				end
+				local ok, err = queues[client].send()
 			end)()
 		end
 	end

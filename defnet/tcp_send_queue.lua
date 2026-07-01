@@ -28,14 +28,6 @@ function M.create(client, chunk_size)
 		end
 	end
 
-	function instance.pending_bytes()
-		local total = 0
-		for _, item in ipairs(queue) do
-			total = total + #item.data - item.sent_index
-		end
-		return total
-	end
-
 	function instance.send()
 		while true do
 			local first = queue[1]
@@ -45,7 +37,7 @@ function M.create(client, chunk_size)
 
 			local sent_index, err, sent_index_on_err = client:send(first.data, first.sent_index + 1, #first.data)
 			if err then
-				first.sent_index = sent_index_on_err or first.sent_index
+				first.sent_index = sent_index_on_err
 				return false, err
 			end
 
