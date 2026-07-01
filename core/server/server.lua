@@ -400,6 +400,10 @@ local function register_player(client, client_data, ip)
 			}
 		}
         tcp_server.send(to_json(t),client)
+		local t_flush = socket.gettime()
+		local ok, flush_err = tcp_server.flush(client)
+		print(string.format("[MAP_PERF] server register_player: initial flush %.1f ms (ok=%s, err=%s, pending=%d)",
+			(socket.gettime() - t_flush) * 1000, tostring(ok), tostring(flush_err), tcp_server.pending_bytes(client)))
 		log("Registered player: ", clients_data[client].uuid, " ", clients_data[client].name, " ", clients_data[client].civilization)
 		plugin.on_player_registered(client)
 		update_players_list()
@@ -527,15 +531,16 @@ local function check_ready()
 end
 
 local function decode_data(data)
+	local separator = data:find("`", 1, true)
+	if not separator then
+		error("Invalid network packet: missing separator")
+	end
 	local decoded_data = {
-		data = ""
+		type = data:sub(1, separator - 1),
+		data = data:sub(separator + 1)
 	}
-	for i in string.gmatch(data, "[^`]+") do
-		if decoded_data.type then
-			decoded_data.data = decoded_data.data..i
-		else
-			decoded_data.type = i
-		end
+	if decoded_data.type == "" then
+		error("Invalid network packet: empty type")
 	end
 
 	decoded_data.data = json.decode(decoded_data.data)
@@ -565,7 +570,13 @@ local function on_data(data, ip, port, client)
 			}
 			tcp_server.send(to_json(t),client)
 		elseif data.type == "introduce" then
+			if clients_data[client] and clients_data[client].connect_time then
+				print(string.format("[MAP_PERF] server: introduce received %.1f ms after accept (ip=%s)",
+					(socket.gettime() - clients_data[client].connect_time) * 1000, tostring(ip)))
+			end
+			local t_reg = socket.gettime()
 			register_player(client, data.data, ip)
+			print(string.format("[MAP_PERF] server: register_player+send queued in %.1f ms", (socket.gettime() - t_reg) * 1000))
 		end
 		if clients_data[client] and clients_data[client].state and clients_data[client].state == "in_game" then
 			plugin.on_data(data, ip, port, client)
@@ -743,6 +754,7 @@ local function on_client_connected(ip, port, client)
 	clients_data[client].ip = ip
 	clients_data[client].port = port
 	clients_data[client].state = "connected"
+	clients_data[client].connect_time = socket.gettime()
 	clients_game_data[client] = {}
 end
 
