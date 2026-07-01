@@ -405,8 +405,19 @@ local function register_player(client, client_data, ip)
 		print(string.format("[MAP_PERF] server register_player: initial flush %.1f ms (ok=%s, err=%s, pending=%d)",
 			(socket.gettime() - t_flush) * 1000, tostring(ok), tostring(flush_err), tcp_server.pending_bytes(client)))
 		log("Registered player: ", clients_data[client].uuid, " ", clients_data[client].name, " ", clients_data[client].civilization)
-		plugin.on_player_registered(client)
-		update_players_list()
+		timer_module.after(0.2, function()
+			if not clients_data[client] or clients_data[client].state ~= "in_game" then
+				return
+			end
+			local t_post = socket.gettime()
+			plugin.on_player_registered(client)
+			print(string.format("[MAP_PERF] server register_player: plugins.on_player_registered %.1f ms",
+				(socket.gettime() - t_post) * 1000))
+			t_post = socket.gettime()
+			update_players_list()
+			print(string.format("[MAP_PERF] server register_player: update_players_list %.1f ms",
+				(socket.gettime() - t_post) * 1000))
+		end)
 	end
 end
 
