@@ -201,17 +201,22 @@ local function send_game_data(client, draw)
 
 	-- analyze_table(origin_game_data.lands.Russia)
 
+	local t_gd_start = socket.gettime()
+
+	local t_json = socket.gettime()
 	local json_data = to_json(origin_game_data)
+	print(string.format("[MAP_PERF] server send_game_data: to_json %.1f ms (size=%d)",
+		(socket.gettime() - t_json) * 1000, #json_data))
 
-	print("Json size:", #json_data)
+	local t_compress = socket.gettime()
+	json_data = lualzw.compress(json_data)
+	print(string.format("[MAP_PERF] server send_game_data: lualzw.compress %.1f ms (-> %d bytes)",
+		(socket.gettime() - t_compress) * 1000, #json_data))
 
-	json_data = lualzw.compress(to_json(origin_game_data))
-
-	print("Compress json size:", #json_data)
-
+	local t_base64 = socket.gettime()
 	json_data = base64.encode(json_data)
-
-	print("Compress base64 json:", #json_data)
+	print(string.format("[MAP_PERF] server send_game_data: base64.encode %.1f ms (-> %d bytes)",
+		(socket.gettime() - t_base64) * 1000, #json_data))
 
 	local st = splitByChunk(json_data, part_size)
 	local n = #st
@@ -219,7 +224,8 @@ local function send_game_data(client, draw)
 	-- For debug
 	-- local md5 = require "scripts.utils.md5"
 	-- print("Send game data hash is: ", md5.sumhexa(json_data))
-	print("Parts count: ", n, part_size, #json_data)
+	print(string.format("[MAP_PERF] server send_game_data: prep TOTAL %.1f ms (parts=%d, part_size=%d, total=%d)",
+		(socket.gettime() - t_gd_start) * 1000, n, part_size, #json_data))
 
 	local t = {
 		type = "game_data_info",
@@ -272,31 +278,46 @@ local prepared_map_files
 local custom_map_hash
 
 local function prepare_map_files()
+	local t_start = socket.gettime()
 	local package_path = get_custom_map_package_path()
 	if not package_path then
 		print("file error: custom map package path not found")
 		return
 	end
 
+	local t_read = socket.gettime()
 	local package_data, err = map_package.read_package(package_path)
 	if not package_data then
 		print("file error:", package_path, err)
 		return
 	end
+	print(string.format("[MAP_PERF] server prepare_map_files: read_package %.1f ms (path=%s)",
+		(socket.gettime() - t_read) * 1000, tostring(package_path)))
 
+	local t_compress = socket.gettime()
 	local d = lualzw.compress(package_data.bytes)
-	print("map package size:", #package_data.bytes)
-	print("compressed", #d)
+	print(string.format("[MAP_PERF] server prepare_map_files: lualzw.compress %.1f ms (%d -> %d bytes)",
+		(socket.gettime() - t_compress) * 1000, #package_data.bytes, #d))
 
 	local luaxxhash = require "luaxxhash"
+	local t_hash = socket.gettime()
 	custom_map_hash = luaxxhash(d)
+	print(string.format("[MAP_PERF] server prepare_map_files: luaxxhash %.1f ms",
+		(socket.gettime() - t_hash) * 1000))
+
+	local t_base64 = socket.gettime()
 	prepared_map_files = base64.encode(d)
-	print("base64", #prepared_map_files)
+	print(string.format("[MAP_PERF] server prepare_map_files: base64.encode %.1f ms (-> %d bytes)",
+		(socket.gettime() - t_base64) * 1000, #prepared_map_files))
+
+	print(string.format("[MAP_PERF] server prepare_map_files: TOTAL %.1f ms",
+		(socket.gettime() - t_start) * 1000))
 end
 
 local function send_map_data(client)
+    local t_start = socket.gettime()
     print("send map data")
-    
+
     local nt = {
         type = "map_data_hash",
         data = {
@@ -304,16 +325,19 @@ local function send_map_data(client)
         }
     }
     tcp_server.send(to_json(nt),client)
-    
+
     local t= {
         type = "map_data",
         data = ""
     }
-    if not find_in_table(tostring(custom_map_hash), clients_data[client].custom_maps) then
+    local client_has_map = find_in_table(tostring(custom_map_hash), clients_data[client].custom_maps)
+    if not client_has_map then
         t.data = prepared_map_files
     end
     --pprint("clients maps: ", clients_data[client].custom_maps, custom_map_hash, find_in_table(custom_map_hash, clients_data[client].custom_maps))
     tcp_server.send(to_json(t),client)
+    print(string.format("[MAP_PERF] server send_map_data: %.1f ms (hash=%s, already_has_map=%s, sent_bytes=%d)",
+        (socket.gettime() - t_start) * 1000, tostring(custom_map_hash), tostring(client_has_map), #t.data))
 end
 
 local function send_game_files(client)
@@ -355,11 +379,14 @@ local function register_player(client, client_data, ip)
 		kick(client, "You do not have a license or you are banned from this server\n"..(info or ""))
 	else
 		clients_data[client].civilization = free_land
+		local t_register = socket.gettime()
 		if game_data.custom_map then
 		    print("custom map")
 		    send_map_data(client)
 		end
 		send_game_data(client, true)
+		print(string.format("[MAP_PERF] server register_player: send map+game data TOTAL %.1f ms (uuid=%s, custom_map=%s)",
+			(socket.gettime() - t_register) * 1000, tostring(clients_data[client].uuid), tostring(game_data.custom_map)))
 		clients_data[client].state = "in_game"
 		local t = {
 			type = "welcome",
