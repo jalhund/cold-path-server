@@ -967,19 +967,29 @@ function set_settings(field, value)
 end
 
 function lang(key, section)
+	local lang_id = settings and settings.lang or "en"
+	local lang_table = langs and langs[lang_id]
+	if not lang_table then
+		return key
+	end
 	if section then
-		return langs[settings.lang][section] and langs[settings.lang][section][key] or key
+		return lang_table[section] and lang_table[section][key] or key
 	else
-		return langs[settings.lang][key] or key
+		return lang_table[key] or key
 	end
 end
 
 function land_lang(land_id)
 	-- return lang(game_data.lands[land_id] and game_data.lands[land_id].name or "error getting civilization name", "lands")
+	if not game_data.lands[land_id] then
+		return tostring(land_id)
+	end
 	local name = lang(game_data.lands[land_id].name, "lands")
 	if game_data.lands[land_id].rebels then
-		if langs[settings.lang].rebels_names then
-			for k, v in pairs(langs[settings.lang].rebels_names) do
+		local lang_id = settings and settings.lang or "en"
+		local lang_table = langs and langs[lang_id]
+		if lang_table and lang_table.rebels_names then
+			for k, v in pairs(lang_table.rebels_names) do
 				name = name:gsub(k, v)
 			end
 		end
