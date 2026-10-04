@@ -190,8 +190,12 @@ function load_adjacency(debug_mode, custom_path)
 	for line in string.gmatch(data, "[^\n]+") do
 		local prov = nil
 		for i in string.gmatch(line, "%S+") do
-			if custom_path then
-				i = tonumber(i)
+			-- Adjacency text contains strings, while custom scenario province
+			-- arrays use numeric keys. This must also work after /ng, when
+			-- load_adjacency is called without a custom_path.
+			local numeric_id = tonumber(i)
+			if numeric_id and game_data.provinces[numeric_id] and not game_data.provinces[i] then
+				i = numeric_id
 			end
 			if first then
 				first = false
