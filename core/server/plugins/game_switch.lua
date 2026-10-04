@@ -194,7 +194,8 @@ function M.game_over(land, win)
 		end
 
 		print("Game data deepcopy")
-		game_data = deepcopy(scenarios[next_map][next_scenario])
+		original_game_data = scenarios[next_map][next_scenario]
+		game_data = deepcopy(original_game_data)
 		modify_game_data(game_data.id)
 		print("next map to nil")
 		next_map = nil
